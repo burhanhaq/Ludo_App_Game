@@ -65,7 +65,7 @@ class _PieceHomeState extends State<PieceHome> {
             called = true;
           }
           gameState.movePiece(p, diceNum);
-          gameState.canDelete(p, p.location);
+          gameState.canDelete(p.location);
         });
       },
       child: Container(

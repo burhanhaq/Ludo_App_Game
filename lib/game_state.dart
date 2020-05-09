@@ -8,24 +8,8 @@ import 'custom_box.dart';
 import 'player_piece.dart';
 
 class GameState extends ChangeNotifier {
-//  int _sheesh = 0;
-//
-//  get sheesh => _sheesh;
-//
-//  set sheesh(int sh) {
-//    _sheesh = sh;
-//    notifyListeners();
-//  }
-
   List<Slot> slotList = List.generate(13 * 4, (index) => Slot(id: index + 1));
-  List<Slot> redEndList =
-      List.generate(6, (index) => Slot(id: index + 1, isEnd: true));
-  List<Slot> blueEndList =
-      List.generate(6, (index) => Slot(id: index + 1, isEnd: true));
-  List<Slot> yellowEndList =
-      List.generate(6, (index) => Slot(id: index + 1, isEnd: true));
-  List<Slot> greenGreenList =
-      List.generate(6, (index) => Slot(id: index + 1, isEnd: true));
+  List<int> movesList = [];
 
   setStop(int id) {
     slotList[id - 1].isStop = true;
@@ -50,46 +34,6 @@ class GameState extends ChangeNotifier {
   Slot getGreenEndSlot(int id) {
     return greenGreenList[id - 1];
   }
-
-  get redCol1 => _redColumn1;
-
-  get redCol2 => _redColumn2;
-
-  get redCol3 => _redColumn3;
-
-  get yellowCol1 => _yellowColumn1;
-
-  get yellowCol2 => _yellowColumn2;
-
-  get yellowCol3 => _yellowColumn3;
-
-  get blueCol1 => _blueColumn1;
-
-  get blueCol2 => _blueColumn2;
-
-  get blueCol3 => _blueColumn3;
-
-  get greenCol1 => _greenColumn1;
-
-  get greenCol2 => _greenColumn2;
-
-  get greenCol3 => _greenColumn3;
-
-  List<Widget> _redColumn1 = [];
-  List<Widget> _redColumn2 = [];
-  List<Widget> _redColumn3 = [];
-
-  List<Widget> _yellowColumn1 = [];
-  List<Widget> _yellowColumn2 = [];
-  List<Widget> _yellowColumn3 = [];
-
-  List<Widget> _greenColumn1 = [];
-  List<Widget> _greenColumn2 = [];
-  List<Widget> _greenColumn3 = [];
-
-  List<Widget> _blueColumn1 = [];
-  List<Widget> _blueColumn2 = [];
-  List<Widget> _blueColumn3 = [];
 
   updateColDate(PieceType piece) {
 //    sheesh += 1;
@@ -163,14 +107,44 @@ class GameState extends ChangeNotifier {
     return pieceTurn[0];
   }
 
-  playTurn() {}
+  playTurn() {
+    // starting
+    PieceType turn = getTurn();
+    bool canThrowDice = true;
+    do {
+      int diceNum = throwDice();
+      movesList.add(diceNum);
+      canThrowDice = false;
+      if (diceNum == 6) {
+        canThrowDice = true;
+        int len = movesList.length;
+        if (len >= 3) {
+          if (movesList[len - 1] == 6 &&
+              movesList[len - 2] == 6 &&
+              movesList[len - 3] == 6) {
+            canThrowDice = false;
+            movesList.removeLast();
+            movesList.removeLast();
+            movesList.removeLast();
+          }
+        }
+      }
+    } while (canThrowDice);
 
-  bool canDelete(PlayerPiece topPiece, int slotId) {
+    // turn end
+    pieceTurn.removeAt(0);
+    pieceTurn.add(turn);
+    movesList.clear();
+    notifyListeners();
+  }
+
+  bool canDelete(int slotId) {
     if (getSlot(slotId).isStop) return false;
     var pieceList = getSlot(slotId).playerPieceList;
-    if (pieceList.length == 0) return false;
+    if (pieceList.length <= 1) return false;
     int playerPieceCount = 0;
     int otherPieceCount = 0;
+    PlayerPiece topPiece = pieceList.last;
     for (int i = 0; i < pieceList.length; i++) {
       if (pieceList[i].pieceType == topPiece.pieceType) {
         ++playerPieceCount;
@@ -178,15 +152,16 @@ class GameState extends ChangeNotifier {
         ++otherPieceCount;
       }
     }
+    if (otherPieceCount <= 0) return false;
     if (playerPieceCount >= otherPieceCount) {
-      print('hahahah');
+      print('CanDelete() true');
 //      print(topPiece);
 //      deletePiece(topPiece, slotId);
     }
     return playerPieceCount >= otherPieceCount;
   }
 
-  deleteBottomPiece(int slotId) {
+  deleteBottomPieces(int slotId) {
     var pieceList = getSlot(slotId).playerPieceList;
     PlayerPiece topPiece = pieceList.last;
 //    print('before');
@@ -253,6 +228,55 @@ class GameState extends ChangeNotifier {
   int throwDice() {
     return math.Random().nextInt(6) + 1;
   }
+
+  List<Slot> redEndList =
+      List.generate(6, (index) => Slot(id: index + 1, isEnd: true));
+  List<Slot> blueEndList =
+      List.generate(6, (index) => Slot(id: index + 1, isEnd: true));
+  List<Slot> yellowEndList =
+      List.generate(6, (index) => Slot(id: index + 1, isEnd: true));
+  List<Slot> greenGreenList =
+      List.generate(6, (index) => Slot(id: index + 1, isEnd: true));
+
+  get redCol1 => _redColumn1;
+
+  get redCol2 => _redColumn2;
+
+  get redCol3 => _redColumn3;
+
+  get yellowCol1 => _yellowColumn1;
+
+  get yellowCol2 => _yellowColumn2;
+
+  get yellowCol3 => _yellowColumn3;
+
+  get blueCol1 => _blueColumn1;
+
+  get blueCol2 => _blueColumn2;
+
+  get blueCol3 => _blueColumn3;
+
+  get greenCol1 => _greenColumn1;
+
+  get greenCol2 => _greenColumn2;
+
+  get greenCol3 => _greenColumn3;
+
+  List<Widget> _redColumn1 = [];
+  List<Widget> _redColumn2 = [];
+  List<Widget> _redColumn3 = [];
+
+  List<Widget> _yellowColumn1 = [];
+  List<Widget> _yellowColumn2 = [];
+  List<Widget> _yellowColumn3 = [];
+
+  List<Widget> _greenColumn1 = [];
+  List<Widget> _greenColumn2 = [];
+  List<Widget> _greenColumn3 = [];
+
+  List<Widget> _blueColumn1 = [];
+  List<Widget> _blueColumn2 = [];
+  List<Widget> _blueColumn3 = [];
 
   initColumn() {
     _redColumn1 = [
