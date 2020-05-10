@@ -11,6 +11,7 @@ class GameState extends ChangeNotifier {
   List<Slot> slotList = List.generate(13 * 4, (index) => Slot(id: index + 1));
   List<int> movesList = [];
   bool killToken = false;
+//  PieceType turn = getTurn();
 
   setStop(int id) {
     slotList[id - 1].isStop = true;
@@ -82,6 +83,8 @@ class GameState extends ChangeNotifier {
 
   pieceTap(PlayerPiece pp) {
     print('Tapped Piece');
+    if (pp == null) return;
+    print('not return');
     if (pp.pieceType == getTurn()) {
       if (movesList.length > 0) {
         if (pp.location == 0) {
@@ -259,10 +262,8 @@ class GameState extends ChangeNotifier {
     if (newLocation > 52) {
       newLocation -= 52;
     }
-    print('curLoc: ${pp.location}');
+    getSlot(curLocation).playerPieceList.remove(pp);
     pp.location = newLocation;
-    print('afterUpdate: ${pp.location}');
-    getSlot(curLocation).playerPieceList.removeLast();
     getSlot(newLocation).playerPieceList.add(pp);
     movesList.remove(moveDistance);
     if (movesList.isEmpty) {
@@ -297,35 +298,39 @@ class GameState extends ChangeNotifier {
   }
 
   generatePlayerPieces() {
-    redPlayerPieces = List.generate(
-      kNumPlayerPieces,
-      (index) => PlayerPiece(
-        pieceId: index,
-        pieceType: PieceType.Red,
-        func: pieceTap,
-      ),
-    );
-    bluePlayerPieces = List.generate(
-      kNumPlayerPieces,
-      (index) => PlayerPiece(
-        pieceId: index,
-        pieceType: PieceType.Blue,
-        func: pieceTap,
-      ),
-    );
-    yellowPlayerPieces = List.generate(
-      kNumPlayerPieces,
-      (index) => PlayerPiece(
-        pieceId: index,
-        pieceType: PieceType.Yellow,
-        func: pieceTap,
-      ),
-    );
     greenPlayerPieces = List.generate(
       kNumPlayerPieces,
       (index) => PlayerPiece(
         pieceId: index,
         pieceType: PieceType.Green,
+        pieceTurn: getTurn(),
+        func: pieceTap,
+      ),
+    );
+    bluePlayerPieces = List.generate(
+      kNumPlayerPieces,
+          (index) => PlayerPiece(
+        pieceId: index,
+        pieceType: PieceType.Blue,
+        pieceTurn: getTurn(),
+        func: pieceTap,
+      ),
+    );
+    redPlayerPieces = List.generate(
+      kNumPlayerPieces,
+          (index) => PlayerPiece(
+        pieceId: index,
+        pieceType: PieceType.Red,
+        pieceTurn: getTurn(),
+        func: pieceTap,
+      ),
+    );
+    yellowPlayerPieces = List.generate(
+      kNumPlayerPieces,
+          (index) => PlayerPiece(
+        pieceId: index,
+        pieceType: PieceType.Yellow,
+        pieceTurn: getTurn(),
         func: pieceTap,
       ),
     );

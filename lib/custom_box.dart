@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'constants.dart';
 import 'game_state.dart';
 import 'slot.dart';
+import 'player_piece.dart';
 
 class CustomBox extends StatefulWidget {
   Slot slot;
@@ -14,9 +15,7 @@ class CustomBox extends StatefulWidget {
   @override
   _CustomBoxState createState() => _CustomBoxState();
 }
-
 class _CustomBoxState extends State<CustomBox> {
-
   @override
   Widget build(BuildContext context) {
     GameState gameState = Provider.of<GameState>(context);
@@ -26,8 +25,7 @@ class _CustomBoxState extends State<CustomBox> {
     } else if (widget.slot.isEnd) {
       text = 'E';
     }
-
-    text = '';
+//    text = '';
     Widget textWidget = Text(
       text,
       style: TextStyle(
@@ -39,20 +37,45 @@ class _CustomBoxState extends State<CustomBox> {
     var value = 0.0;
     List<Widget> playerPieceListWidget =
         List.generate(widget.slot.playerPieceList.length, (index) {
-          value += 4.0;
+      value += 4.0;
       return Positioned(
-          top: value, child: widget.slot.playerPieceList[index].container);
+        top: value,
+        child: IgnorePointer(
+          child: widget.slot.playerPieceList[index].container,
+        ),
+      );
     });
+    if (playerPieceListWidget.isNotEmpty) {
+      print('PlayerPieceList --------------------------------');
+      print(widget.slot.playerPieceList);
+      print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
+    }
     List<Widget> stackList = [textWidget] + playerPieceListWidget;
-    return Container(
-      margin: const EdgeInsets.all(1.0),
-      color: widget.c,
-      child: SizedBox(
-        height: boxWidth,
-        width: boxWidth,
-        child: Stack(
-          alignment: Alignment.center,
-          children: stackList,
+//    print('StackList --------------------------------');
+//    print(stackList);
+    PieceType turn = gameState.getTurn();
+    bool containsPiece = widget.slot.playerPieceList
+        .any((element) => element.pieceType == turn);
+    PlayerPiece pp;
+    if (containsPiece) {
+      print('AllPlayerPieceLists on slot --------------------------------');
+      print(widget.slot.playerPieceList);
+      print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
+      pp = widget.slot.playerPieceList
+          .firstWhere((element) => element.pieceType == turn);
+    }
+    return GestureDetector(
+      onTap: () => gameState.pieceTap(pp),
+      child: Container(
+        margin: const EdgeInsets.all(1.0),
+        color: widget.c,
+        child: SizedBox(
+          height: boxWidth,
+          width: boxWidth,
+          child: Stack(
+            alignment: Alignment.center,
+            children: stackList,
+          ),
         ),
       ),
     );
