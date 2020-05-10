@@ -10,6 +10,7 @@ import 'player_piece.dart';
 class GameState extends ChangeNotifier {
   List<Slot> slotList = List.generate(13 * 4, (index) => Slot(id: index + 1));
   List<int> movesList = [];
+  bool killToken = false;
 
   setStop(int id) {
     slotList[id - 1].isStop = true;
@@ -32,7 +33,7 @@ class GameState extends ChangeNotifier {
   }
 
   Slot getGreenEndSlot(int id) {
-    return greenGreenList[id - 1];
+    return greenEndList[id - 1];
   }
 
   updateColDate(PieceType piece) {
@@ -52,6 +53,7 @@ class GameState extends ChangeNotifier {
   }
 
   initialize() {
+    generatePlayerPieces();
     initColumn();
     // 1 - 13 green
     setStop(4);
@@ -67,35 +69,6 @@ class GameState extends ChangeNotifier {
     setStop(48);
   }
 
-  List<PlayerPiece> redPlayerPieces = List.generate(
-    4,
-    (index) => PlayerPiece(
-      pieceId: index,
-      pieceType: PieceType.Red,
-    ),
-  );
-  List<PlayerPiece> bluePlayerPieces = List.generate(
-    4,
-    (index) => PlayerPiece(
-      pieceId: index,
-      pieceType: PieceType.Blue,
-    ),
-  );
-  List<PlayerPiece> yellowPlayerPieces = List.generate(
-    4,
-    (index) => PlayerPiece(
-      pieceId: index,
-      pieceType: PieceType.Yellow,
-    ),
-  );
-  List<PlayerPiece> greenPlayerPieces = List.generate(
-    4,
-    (index) => PlayerPiece(
-      pieceId: index,
-      pieceType: PieceType.Green,
-    ),
-  );
-
   List<PieceType> pieceTurn = [
     PieceType.Green,
     PieceType.Blue,
@@ -107,35 +80,101 @@ class GameState extends ChangeNotifier {
     return pieceTurn[0];
   }
 
+  pieceTap(PlayerPiece pp) {
+    print('Tapped Piece');
+    if (pp.pieceType == getTurn()) {
+      if (movesList.length > 0) {
+        if (pp.location == 0) {
+          if (movesList.contains(6)) {
+            addPiece(pp.pieceType);
+          }
+        } else {
+          movePiece(pp, movesList[0]);
+        }
+      } else {
+        print('No moves available. Tap Dice for moves');
+      }
+    } else {
+      print('Please wait your turn sir');
+    }
+  }
+
+  void diceTap() {
+    PieceType turn = getTurn();
+    bool canThrow = canThrowDice();
+    if (!canThrow) return;
+//    if (canThrow) {
+    int diceNum = throwDice();
+    movesList.add(diceNum);
+//    }
+    canThrow = canThrowDice();
+    bool allPiecesAtHome;
+    switch (turn) {
+      case PieceType.Green:
+        allPiecesAtHome =
+            greenPlayerPieces.every((element) {
+              print(element.toString());
+               return element.isAtHome();
+            });
+        break;
+      case PieceType.Blue:
+        allPiecesAtHome = bluePlayerPieces.every((element) => element.isAtHome());
+        break;
+      case PieceType.Red:
+        allPiecesAtHome = redPlayerPieces.every((element) => element.isAtHome());
+        break;
+      case PieceType.Yellow:
+        allPiecesAtHome =
+            yellowPlayerPieces.every((element) => element.isAtHome());
+        break;
+    }
+    print('ALL HOME: $allPiecesAtHome');
+    if (allPiecesAtHome && !canThrow && !movesList.contains(6)) {
+      print('clearing: $movesList');
+      movesList.clear();
+    }
+    if (movesList.isEmpty) {
+      changeTurn();
+//      movesList.clear();
+    }
+    notifyListeners();
+  }
+
+  canThrowDice() {
+    if (killToken) {
+      killToken = false;
+      return true;
+    }
+//    bool returnResult = true;
+    if (movesList.isEmpty) return true;
+    if (movesList.last != 6) return false;
+    int len = movesList.length;
+    if (len >= 3) {
+      if (movesList[len - 1] == 6 &&
+          movesList[len - 2] == 6 &&
+          movesList[len - 3] == 6) {
+        movesList.removeLast();
+        movesList.removeLast();
+        movesList.removeLast();
+        notifyListeners();
+        return false;
+      }
+    }
+    notifyListeners();
+    return true;
+//    return returnResult;
+  }
+
   playTurn() {
     // starting
-    PieceType turn = getTurn();
-    bool canThrowDice = true;
-    do {
-      int diceNum = throwDice();
-      movesList.add(diceNum);
-      canThrowDice = false;
-      if (diceNum == 6) {
-        canThrowDice = true;
-        int len = movesList.length;
-        if (len >= 3) {
-          if (movesList[len - 1] == 6 &&
-              movesList[len - 2] == 6 &&
-              movesList[len - 3] == 6) {
-            canThrowDice = false;
-            movesList.removeLast();
-            movesList.removeLast();
-            movesList.removeLast();
-          }
-        }
-      }
-    } while (canThrowDice);
 
     // turn end
-    pieceTurn.removeAt(0);
-    pieceTurn.add(turn);
+  }
+
+  changeTurn() {
+    PieceType pt = pieceTurn.removeAt(0);
+    pieceTurn.add(pt);
     movesList.clear();
-    notifyListeners();
   }
 
   bool canDelete(int slotId) {
@@ -155,26 +194,28 @@ class GameState extends ChangeNotifier {
     if (otherPieceCount <= 0) return false;
     if (playerPieceCount >= otherPieceCount) {
       print('CanDelete() true');
-//      print(topPiece);
-//      deletePiece(topPiece, slotId);
     }
     return playerPieceCount >= otherPieceCount;
   }
 
   deleteBottomPieces(int slotId) {
+    killToken = true;
     var pieceList = getSlot(slotId).playerPieceList;
     PlayerPiece topPiece = pieceList.last;
-//    print('before');
-//    print(list);
+    List<PlayerPiece> otherPieces;
+    getSlot(slotId).playerPieceList.forEach((element) {
+      if (element.pieceType != topPiece.pieceType) {
+        otherPieces.add(element);
+      }
+    });
+    otherPieces.forEach((element) => element.location = 0);
     getSlot(slotId)
         .playerPieceList
         .removeWhere((element) => element.pieceType != topPiece.pieceType);
-//    print('after');
-//    print(list);
     notifyListeners();
   }
 
-  PlayerPiece addPiece(PieceType pt) {
+  addPiece(PieceType pt) {
     PlayerPiece pp;
     Iterable<PlayerPiece> availablePieces;
     int homePosition;
@@ -201,16 +242,15 @@ class GameState extends ChangeNotifier {
         break;
     }
     if (availablePieces.length > 0) {
-      if (availablePieces.length > 0) {
         pp = availablePieces.first;
         pp.location = homePosition;
         getSlot(homePosition).playerPieceList.add(pp);
-      }
+        movesList.remove(6);
+
     } else {
       print('AddPiece() No available pieces found');
     }
     notifyListeners();
-    return pp;
   }
 
   movePiece(PlayerPiece pp, int moveDistance) {
@@ -219,15 +259,82 @@ class GameState extends ChangeNotifier {
     if (newLocation > 52) {
       newLocation -= 52;
     }
+    print('curLoc: ${pp.location}');
     pp.location = newLocation;
+    print('afterUpdate: ${pp.location}');
     getSlot(curLocation).playerPieceList.removeLast();
     getSlot(newLocation).playerPieceList.add(pp);
+    movesList.remove(moveDistance);
+    if (movesList.isEmpty) {
+      changeTurn();
+    }
     notifyListeners();
   }
 
   int throwDice() {
-    return math.Random().nextInt(6) + 1;
+    int num = math.Random().nextInt(6) + 1;
+    print('threw $num');
+    return num;
   }
+
+  static Color getColor(PieceType pt) {
+    switch (pt) {
+      case PieceType.Green:
+        return green;
+        break;
+      case PieceType.Blue:
+        return blue;
+        break;
+      case PieceType.Red:
+        return red1;
+        break;
+      case PieceType.Yellow:
+        return yellow;
+        break;
+      default:
+        return white;
+    }
+  }
+
+  generatePlayerPieces() {
+    redPlayerPieces = List.generate(
+      kNumPlayerPieces,
+      (index) => PlayerPiece(
+        pieceId: index,
+        pieceType: PieceType.Red,
+        func: pieceTap,
+      ),
+    );
+    bluePlayerPieces = List.generate(
+      kNumPlayerPieces,
+      (index) => PlayerPiece(
+        pieceId: index,
+        pieceType: PieceType.Blue,
+        func: pieceTap,
+      ),
+    );
+    yellowPlayerPieces = List.generate(
+      kNumPlayerPieces,
+      (index) => PlayerPiece(
+        pieceId: index,
+        pieceType: PieceType.Yellow,
+        func: pieceTap,
+      ),
+    );
+    greenPlayerPieces = List.generate(
+      kNumPlayerPieces,
+      (index) => PlayerPiece(
+        pieceId: index,
+        pieceType: PieceType.Green,
+        func: pieceTap,
+      ),
+    );
+  }
+
+  List<PlayerPiece> redPlayerPieces = [];
+  List<PlayerPiece> bluePlayerPieces = [];
+  List<PlayerPiece> yellowPlayerPieces = [];
+  List<PlayerPiece> greenPlayerPieces = [];
 
   List<Slot> redEndList =
       List.generate(6, (index) => Slot(id: index + 1, isEnd: true));
@@ -235,7 +342,7 @@ class GameState extends ChangeNotifier {
       List.generate(6, (index) => Slot(id: index + 1, isEnd: true));
   List<Slot> yellowEndList =
       List.generate(6, (index) => Slot(id: index + 1, isEnd: true));
-  List<Slot> greenGreenList =
+  List<Slot> greenEndList =
       List.generate(6, (index) => Slot(id: index + 1, isEnd: true));
 
   get redCol1 => _redColumn1;

@@ -32,49 +32,77 @@ class PieceHome extends StatefulWidget {
 }
 
 class _PieceHomeState extends State<PieceHome> {
-  bool called = false;
+//  bool called = false;
   int diceNum = 0;
-  PlayerPiece p;
+//  PlayerPiece p;
 
   @override
   Widget build(BuildContext context) {
     var gameState = Provider.of<GameState>(context);
-    List<PlayerPiece> piecesList;
+    List<PlayerPiece> piecesList = [];
     switch (widget.pt) {
       case PieceType.Green:
-        piecesList = gameState.greenPlayerPieces;
+        gameState.greenPlayerPieces.forEach((element) {
+          if (element.location == 0) piecesList.add(element);
+        });
         break;
       case PieceType.Blue:
-        piecesList = gameState.bluePlayerPieces;
+        gameState.bluePlayerPieces.forEach((element) {
+          if (element.location == 0) piecesList.add(element);
+        });
         break;
       case PieceType.Red:
-        piecesList = gameState.redPlayerPieces;
+        gameState.redPlayerPieces.forEach((element) {
+          if (element.location == 0) piecesList.add(element);
+        });
         break;
       case PieceType.Yellow:
-        piecesList = gameState.yellowPlayerPieces;
+        gameState.yellowPlayerPieces.forEach((element) {
+          if (element.location == 0) piecesList.add(element);
+        });
         break;
     }
-    List<Widget> widgetPieceList =
-        List.generate(piecesList.length, (index) => piecesList[0].container);
+    List<Widget> widgetPieceList = List.generate(
+      piecesList.length,
+      (index) => GestureDetector(
+//        onTap: () => gameState.pieceTap(piecesList[index]),
+        child: Container(
+          margin: const EdgeInsets.all(7.0),
+          child: piecesList[index].container,
+        ),
+      ),
+    );
     return GestureDetector(
       onTap: () {
         setState(() {
-          diceNum = gameState.throwDice();
-          if (!called) {
-            p = gameState.addPiece(widget.pt);
-            called = true;
-          }
-          gameState.movePiece(p, diceNum);
-          gameState.canDelete(p.location);
+//          diceNum = gameState.throwDice();
+//          if (!called) {
+//            p = gameState.addPiece(widget.pt);
+//            called = true;
+//          }
+//          gameState.movePiece(p, diceNum);
+//          gameState.canDelete(p.location);
         });
       },
       child: Container(
         height: homeWidth,
         width: homeWidth,
-        color: widget.c,
+        decoration: BoxDecoration(
+          color: gameState.getTurn() == widget.pt ? trans : widget.c,
+          boxShadow: [
+            BoxShadow(
+              color: white,
+            ),
+            BoxShadow(
+              color: widget.c,
+              blurRadius: 15,
+              spreadRadius: -10,
+            ),
+          ],
+        ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('diceNum: $diceNum', style: kStyle),
             Column(
               children: widgetPieceList,
             ),

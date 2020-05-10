@@ -24,9 +24,10 @@ class _CustomBoxState extends State<CustomBox> {
     if (widget.slot.isStop) {
       text = 'S';
     } else if (widget.slot.isEnd) {
-      text = 'HS';
+      text = 'E';
     }
 
+    text = '';
     Widget textWidget = Text(
       text,
       style: TextStyle(
@@ -35,7 +36,6 @@ class _CustomBoxState extends State<CustomBox> {
         decoration: TextDecoration.none,
       ),
     );
-//    int xx = gameState.sheesh;
     var value = 0.0;
     List<Widget> playerPieceListWidget =
         List.generate(widget.slot.playerPieceList.length, (index) {
@@ -43,7 +43,6 @@ class _CustomBoxState extends State<CustomBox> {
       return Positioned(
           top: value, child: widget.slot.playerPieceList[index].container);
     });
-//    print(xx);
     List<Widget> stackList = [textWidget] + playerPieceListWidget;
     return Container(
       margin: const EdgeInsets.all(1.0),

@@ -26,8 +26,12 @@ const Color orange = Color(0xffff9f68);
 const boxWidth = 25.0;
 const homeWidth = 160.0;
 
-enum PieceType { Red, Green, Yellow, Blue }
+enum PieceType { Green, Blue, Red, Yellow }
 
 const kHomeLocation = 0;
 
-const kStyle = TextStyle(fontSize: 15, color: Colors.black, decoration: TextDecoration.none);
+const kStyle = TextStyle(
+    fontSize: 15, color: Colors.black, decoration: TextDecoration.none);
+
+const kSmallDiceSize = 40.0;
+const kNumPlayerPieces = 4;

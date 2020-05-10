@@ -5,11 +5,21 @@ import 'package:provider/provider.dart';
 import 'constants.dart';
 import 'piece_home.dart';
 import 'game_state.dart';
+import 'dice.dart';
 
 class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var gameState = Provider.of<GameState>(context);
+    Color stateColor = GameState.getColor(gameState.getTurn());
+    List<Widget> diceMovesList = List.generate(
+      gameState.movesList.length,
+      (index) => Dice(
+        size: kSmallDiceSize,
+        c: stateColor,
+        num: gameState.movesList[index],
+      ),
+    );
     return SafeArea(
       child: Container(
         child: Column(
@@ -51,8 +61,20 @@ class Home extends StatelessWidget {
                 PieceHome(PieceType.Yellow),
               ],
             ),
-            SizedBox(height: 50),
-            Dice(size: 100),
+            SizedBox(height: 20),
+            SizedBox(
+              height: kSmallDiceSize,
+              child: ListView(
+                physics: BouncingScrollPhysics(),
+                scrollDirection: Axis.horizontal,
+                children: diceMovesList,
+              ),
+            ),
+            SizedBox(height: 20),
+            GestureDetector(
+              onTap: gameState.diceTap,
+              child: Dice(size: 100, c: stateColor),
+            ),
           ],
         ),
       ),
@@ -60,43 +82,3 @@ class Home extends StatelessWidget {
   }
 }
 
-class Dice extends StatelessWidget {
-  double size;
-
-  Dice({this.size = 50});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: size,
-      width: size,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.all(Radius.circular(size / 9)),
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: <Widget>[
-          Positioned(
-            top: size / 10,
-            right: size / 10,
-            child: Icon(
-              Icons.fiber_manual_record,
-              color: red1,
-              size: size / 3,
-            ),
-          ),
-          Positioned(
-            bottom: size / 10,
-            left: size / 10,
-            child: Icon(
-              Icons.fiber_manual_record,
-              color: red1,
-              size: size / 3,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
