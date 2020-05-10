@@ -11,6 +11,7 @@ class GameState extends ChangeNotifier {
   List<Slot> slotList = List.generate(13 * 4, (index) => Slot(id: index + 1));
   List<int> movesList = [];
   bool killToken = false;
+
 //  PieceType turn = getTurn();
 
   setStop(int id) {
@@ -84,7 +85,7 @@ class GameState extends ChangeNotifier {
   pieceTap(PlayerPiece pp) {
     print('Tapped Piece');
     if (pp == null) return;
-    print('not return');
+    if (canThrowDice()) return;
     if (pp.pieceType == getTurn()) {
       if (movesList.length > 0) {
         if (pp.location == 0) {
@@ -114,17 +115,18 @@ class GameState extends ChangeNotifier {
     bool allPiecesAtHome;
     switch (turn) {
       case PieceType.Green:
-        allPiecesAtHome =
-            greenPlayerPieces.every((element) {
-              print(element.toString());
-               return element.isAtHome();
-            });
+        allPiecesAtHome = greenPlayerPieces.every((element) {
+          print(element.toString());
+          return element.isAtHome();
+        });
         break;
       case PieceType.Blue:
-        allPiecesAtHome = bluePlayerPieces.every((element) => element.isAtHome());
+        allPiecesAtHome =
+            bluePlayerPieces.every((element) => element.isAtHome());
         break;
       case PieceType.Red:
-        allPiecesAtHome = redPlayerPieces.every((element) => element.isAtHome());
+        allPiecesAtHome =
+            redPlayerPieces.every((element) => element.isAtHome());
         break;
       case PieceType.Yellow:
         allPiecesAtHome =
@@ -138,7 +140,6 @@ class GameState extends ChangeNotifier {
     }
     if (movesList.isEmpty) {
       changeTurn();
-//      movesList.clear();
     }
     notifyListeners();
   }
@@ -148,7 +149,6 @@ class GameState extends ChangeNotifier {
       killToken = false;
       return true;
     }
-//    bool returnResult = true;
     if (movesList.isEmpty) return true;
     if (movesList.last != 6) return false;
     int len = movesList.length;
@@ -165,14 +165,8 @@ class GameState extends ChangeNotifier {
     }
     notifyListeners();
     return true;
-//    return returnResult;
   }
 
-  playTurn() {
-    // starting
-
-    // turn end
-  }
 
   changeTurn() {
     PieceType pt = pieceTurn.removeAt(0);
@@ -183,10 +177,10 @@ class GameState extends ChangeNotifier {
   bool canDelete(int slotId) {
     if (getSlot(slotId).isStop) return false;
     var pieceList = getSlot(slotId).playerPieceList;
-    if (pieceList.length <= 1) return false;
+    if (pieceList.isEmpty) return false;
+    PlayerPiece topPiece = pieceList.last;
     int playerPieceCount = 0;
     int otherPieceCount = 0;
-    PlayerPiece topPiece = pieceList.last;
     for (int i = 0; i < pieceList.length; i++) {
       if (pieceList[i].pieceType == topPiece.pieceType) {
         ++playerPieceCount;
@@ -205,7 +199,7 @@ class GameState extends ChangeNotifier {
     killToken = true;
     var pieceList = getSlot(slotId).playerPieceList;
     PlayerPiece topPiece = pieceList.last;
-    List<PlayerPiece> otherPieces;
+    List<PlayerPiece> otherPieces = [];
     getSlot(slotId).playerPieceList.forEach((element) {
       if (element.pieceType != topPiece.pieceType) {
         otherPieces.add(element);
@@ -245,11 +239,10 @@ class GameState extends ChangeNotifier {
         break;
     }
     if (availablePieces.length > 0) {
-        pp = availablePieces.first;
-        pp.location = homePosition;
-        getSlot(homePosition).playerPieceList.add(pp);
-        movesList.remove(6);
-
+      pp = availablePieces.first;
+      pp.location = homePosition;
+      getSlot(homePosition).playerPieceList.add(pp);
+      movesList.remove(6);
     } else {
       print('AddPiece() No available pieces found');
     }
@@ -266,7 +259,11 @@ class GameState extends ChangeNotifier {
     pp.location = newLocation;
     getSlot(newLocation).playerPieceList.add(pp);
     movesList.remove(moveDistance);
-    if (movesList.isEmpty) {
+    // check if can delete
+    if (canDelete(pp.location)) {
+      deleteBottomPieces(pp.location);
+    }
+    if (movesList.isEmpty && !killToken) {
       changeTurn();
     }
     notifyListeners();
@@ -309,7 +306,7 @@ class GameState extends ChangeNotifier {
     );
     bluePlayerPieces = List.generate(
       kNumPlayerPieces,
-          (index) => PlayerPiece(
+      (index) => PlayerPiece(
         pieceId: index,
         pieceType: PieceType.Blue,
         pieceTurn: getTurn(),
@@ -318,7 +315,7 @@ class GameState extends ChangeNotifier {
     );
     redPlayerPieces = List.generate(
       kNumPlayerPieces,
-          (index) => PlayerPiece(
+      (index) => PlayerPiece(
         pieceId: index,
         pieceType: PieceType.Red,
         pieceTurn: getTurn(),
@@ -327,7 +324,7 @@ class GameState extends ChangeNotifier {
     );
     yellowPlayerPieces = List.generate(
       kNumPlayerPieces,
-          (index) => PlayerPiece(
+      (index) => PlayerPiece(
         pieceId: index,
         pieceType: PieceType.Yellow,
         pieceTurn: getTurn(),
