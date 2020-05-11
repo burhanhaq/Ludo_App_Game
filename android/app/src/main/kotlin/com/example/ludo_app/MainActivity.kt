@@ -1,4 +1,4 @@
-package com.example.ludo_app
+package dev.brhn.disisludo
 
 import io.flutter.embedding.android.FlutterActivity
 

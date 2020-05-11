@@ -25,7 +25,7 @@ class Home extends StatelessWidget {
         child: Column(
 //        mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.04),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
