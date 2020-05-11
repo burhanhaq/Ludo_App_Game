@@ -15,6 +15,7 @@ class CustomBox extends StatefulWidget {
   @override
   _CustomBoxState createState() => _CustomBoxState();
 }
+
 class _CustomBoxState extends State<CustomBox> {
   @override
   Widget build(BuildContext context) {
@@ -54,8 +55,8 @@ class _CustomBoxState extends State<CustomBox> {
 //    print('StackList --------------------------------');
 //    print(stackList);
     PieceType turn = gameState.getTurn();
-    bool containsPiece = widget.slot.playerPieceList
-        .any((element) => element.pieceType == turn);
+    bool containsPiece =
+        widget.slot.playerPieceList.any((element) => element.pieceType == turn);
     PlayerPiece pp;
     if (containsPiece) {
       print('AllPlayerPieceLists on slot --------------------------------');
@@ -67,8 +68,11 @@ class _CustomBoxState extends State<CustomBox> {
     return GestureDetector(
       onTap: () => gameState.pieceTap(pp),
       child: Container(
-        margin: const EdgeInsets.all(1.0),
-        color: widget.c,
+//        margin: const EdgeInsets.all(1.0),
+        decoration: BoxDecoration(
+          color: widget.c,
+          border: Border.all(color: Colors.black, width: 1.0),
+        ),
         child: SizedBox(
           height: kBoxWidth,
           width: kBoxWidth,
