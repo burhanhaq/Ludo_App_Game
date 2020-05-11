@@ -24,6 +24,7 @@ const Color pink = Color(0xff85203b);
 const Color orange = Color(0xffff9f68);
 
 const kBoxWidth = 25.0;
+const kBoxBorderWidth = 1.0;
 const kHomeWidth = 160.0;
 
 enum PieceType { Green, Blue, Red, Yellow }

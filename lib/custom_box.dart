@@ -71,7 +71,7 @@ class _CustomBoxState extends State<CustomBox> {
 //        margin: const EdgeInsets.all(1.0),
         decoration: BoxDecoration(
           color: widget.c,
-          border: Border.all(color: Colors.black, width: 1.0),
+          border: Border.all(color: Colors.black, width: kBoxBorderWidth),
         ),
         child: SizedBox(
           height: kBoxWidth,

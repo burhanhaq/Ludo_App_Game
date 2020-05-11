@@ -7,8 +7,11 @@ import 'constants.dart';
 import 'piece_home.dart';
 import 'game_state.dart';
 import 'dice.dart';
+import 'triangle_painter.dart';
 
 class Home extends StatelessWidget {
+  var middleAreaSize = (kBoxWidth + kBoxBorderWidth * 2) * 3;
+
   @override
   Widget build(BuildContext context) {
     var gameState = Provider.of<GameState>(context);
@@ -33,8 +36,8 @@ class Home extends StatelessWidget {
             children: <Widget>[
               SizedBox(height: MediaQuery.of(context).size.height * 0.04),
               SizedBox(
-                height: (kBoxWidth+2) * 15,
-                width: (kBoxWidth+2) * 15,
+                height: (kBoxWidth + kBoxBorderWidth * 2) * 15,
+                width: (kBoxWidth + kBoxBorderWidth * 2) * 15,
                 child: Stack(
                   alignment: Alignment.center,
                   children: <Widget>[
@@ -62,9 +65,34 @@ class Home extends StatelessWidget {
                         child: ColumnArea(piece: PieceType.Blue),
                       ),
                     ),
-                    SizedBox(
-//                      width: kBoxWidth * 3 + 4,
-//                      height: kBoxWidth * 3 + 4,
+                    CustomPaint(
+                      size: Size(middleAreaSize, middleAreaSize),
+                      painter:
+                      TrianglePainter(c: GameState.getColor(PieceType.Green)),
+                    ),
+                    RotatedBox(
+                      quarterTurns: 1,
+                      child: CustomPaint(
+                        size: Size(middleAreaSize, middleAreaSize),
+                        painter:
+                        TrianglePainter(c: GameState.getColor(PieceType.Blue)),
+                      ),
+                    ),
+                    RotatedBox(
+                      quarterTurns: 2,
+                      child: CustomPaint(
+                        size: Size(middleAreaSize, middleAreaSize),
+                        painter:
+                        TrianglePainter(c: GameState.getColor(PieceType.Red)),
+                      ),
+                    ),
+                    RotatedBox(
+                      quarterTurns: 3,
+                      child: CustomPaint(
+                        size: Size(middleAreaSize, middleAreaSize),
+                        painter:
+                        TrianglePainter(c: GameState.getColor(PieceType.Yellow)),
+                      ),
                     ),
                     Positioned(
                       right: 0,
