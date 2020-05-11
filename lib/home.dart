@@ -23,7 +23,6 @@ class Home extends StatelessWidget {
     return SafeArea(
       child: Container(
         child: Column(
-//        mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             SizedBox(height: MediaQuery.of(context).size.height * 0.04),
             Row(
@@ -43,7 +42,9 @@ class Home extends StatelessWidget {
                   quarterTurns: 1,
                   child: ColumnArea(piece: PieceType.Blue),
                 ),
-                Spacer(),
+                SizedBox(
+                  width: kBoxWidth * 3 + 4,
+                ),
                 RotatedBox(
                   quarterTurns: -1,
                   child: ColumnArea(piece: PieceType.Yellow),
@@ -64,6 +65,7 @@ class Home extends StatelessWidget {
             SizedBox(height: 20),
             SizedBox(
               height: kSmallDiceSize,
+              width: MediaQuery.of(context).size.width,
               child: ListView(
                 physics: BouncingScrollPhysics(),
                 scrollDirection: Axis.horizontal,
@@ -81,4 +83,3 @@ class Home extends StatelessWidget {
     );
   }
 }
-

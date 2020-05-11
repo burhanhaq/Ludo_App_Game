@@ -25,7 +25,7 @@ class _CustomBoxState extends State<CustomBox> {
     } else if (widget.slot.isEnd) {
       text = 'E';
     }
-//    text = '';
+    text = '';
     Widget textWidget = Text(
       text,
       style: TextStyle(
@@ -70,8 +70,8 @@ class _CustomBoxState extends State<CustomBox> {
         margin: const EdgeInsets.all(1.0),
         color: widget.c,
         child: SizedBox(
-          height: boxWidth,
-          width: boxWidth,
+          height: kBoxWidth,
+          width: kBoxWidth,
           child: Stack(
             alignment: Alignment.center,
             children: stackList,

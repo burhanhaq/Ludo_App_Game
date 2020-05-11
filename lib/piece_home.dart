@@ -85,8 +85,8 @@ class _PieceHomeState extends State<PieceHome> {
         });
       },
       child: Container(
-        height: homeWidth,
-        width: homeWidth,
+        height: kHomeWidth,
+        width: kHomeWidth,
         decoration: BoxDecoration(
           color: gameState.getTurn() == widget.pt ? trans : widget.c,
           boxShadow: [
