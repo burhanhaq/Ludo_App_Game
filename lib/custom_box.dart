@@ -46,29 +46,19 @@ class _CustomBoxState extends State<CustomBox> {
         ),
       );
     });
-    if (playerPieceListWidget.isNotEmpty) {
-      print('PlayerPieceList --------------------------------');
-      print(widget.slot.playerPieceList);
-      print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
-    }
+
     List<Widget> stackList = [textWidget] + playerPieceListWidget;
-//    print('StackList --------------------------------');
-//    print(stackList);
     PieceType turn = gameState.getTurn();
     bool containsPiece =
         widget.slot.playerPieceList.any((element) => element.pieceType == turn);
     PlayerPiece pp;
     if (containsPiece) {
-      print('AllPlayerPieceLists on slot --------------------------------');
-      print(widget.slot.playerPieceList);
-      print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
       pp = widget.slot.playerPieceList
           .firstWhere((element) => element.pieceType == turn);
     }
     return GestureDetector(
       onTap: () => gameState.pieceTap(pp),
       child: Container(
-//        margin: const EdgeInsets.all(1.0),
         decoration: BoxDecoration(
           color: widget.c,
           border: Border.all(color: Colors.black, width: kBoxBorderWidth),

@@ -8,14 +8,15 @@ import 'piece_home.dart';
 import 'game_state.dart';
 import 'dice.dart';
 import 'triangle_painter.dart';
+import 'player_piece.dart';
 
 class Home extends StatelessWidget {
-  var middleAreaSize = (kBoxWidth + kBoxBorderWidth * 2) * 3;
+  final middleAreaSize = (kBoxWidth + kBoxBorderWidth * 2) * 3;
 
   @override
   Widget build(BuildContext context) {
     var gameState = Provider.of<GameState>(context);
-    Color stateColor = GameState.getColor(gameState.getTurn());
+    Color stateColor = PlayerPiece.getColor(gameState.getTurn());
     List<Widget> diceMovesList = List.generate(
       gameState.movesList.length,
       (index) => Dice(
@@ -68,14 +69,14 @@ class Home extends StatelessWidget {
                     CustomPaint(
                       size: Size(middleAreaSize, middleAreaSize),
                       painter:
-                      TrianglePainter(c: GameState.getColor(PieceType.Green)),
+                      TrianglePainter(c: PlayerPiece.getColor(PieceType.Green)),
                     ),
                     RotatedBox(
                       quarterTurns: 1,
                       child: CustomPaint(
                         size: Size(middleAreaSize, middleAreaSize),
                         painter:
-                        TrianglePainter(c: GameState.getColor(PieceType.Blue)),
+                        TrianglePainter(c: PlayerPiece.getColor(PieceType.Blue)),
                       ),
                     ),
                     RotatedBox(
@@ -83,7 +84,7 @@ class Home extends StatelessWidget {
                       child: CustomPaint(
                         size: Size(middleAreaSize, middleAreaSize),
                         painter:
-                        TrianglePainter(c: GameState.getColor(PieceType.Red)),
+                        TrianglePainter(c: PlayerPiece.getColor(PieceType.Red)),
                       ),
                     ),
                     RotatedBox(
@@ -91,7 +92,7 @@ class Home extends StatelessWidget {
                       child: CustomPaint(
                         size: Size(middleAreaSize, middleAreaSize),
                         painter:
-                        TrianglePainter(c: GameState.getColor(PieceType.Yellow)),
+                        TrianglePainter(c: PlayerPiece.getColor(PieceType.Yellow)),
                       ),
                     ),
                     Positioned(

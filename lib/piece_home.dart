@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import 'constants.dart';
 import 'game_state.dart';
-import 'column_area.dart';
 import 'player_piece.dart';
 
 class PieceHome extends StatefulWidget {
@@ -11,20 +10,7 @@ class PieceHome extends StatefulWidget {
   var c;
 
   PieceHome([this.pt]) {
-    switch (pt) {
-      case PieceType.Green:
-        c = green;
-        break;
-      case PieceType.Blue:
-        c = blue;
-        break;
-      case PieceType.Red:
-        c = red1;
-        break;
-      case PieceType.Yellow:
-        c = yellow;
-        break;
-    }
+    c = PlayerPiece.getColor(this.pt);
   }
 
   @override
@@ -32,9 +18,7 @@ class PieceHome extends StatefulWidget {
 }
 
 class _PieceHomeState extends State<PieceHome> {
-//  bool called = false;
   int diceNum = 0;
-//  PlayerPiece p;
 
   @override
   Widget build(BuildContext context) {
@@ -62,52 +46,50 @@ class _PieceHomeState extends State<PieceHome> {
         });
         break;
     }
+    for (int i = 0; i < 4 - piecesList.length; i++) {
+      piecesList.add(null);
+    }
     List<Widget> widgetPieceList = List.generate(
       piecesList.length,
       (index) => GestureDetector(
-//        onTap: () => gameState.pieceTap(piecesList[index]),
+        onTap: () => gameState.pieceTap(piecesList[0]),
         child: Container(
-          margin: const EdgeInsets.all(7.0),
-          child: piecesList[index].container,
+          height: kPieceSize - 5,
+          width: kPieceSize - 5,
+          decoration: BoxDecoration(
+            color: Colors.black12,
+            shape: BoxShape.circle,
+          ),
+          child: Container(
+            margin: const EdgeInsets.all(7.0),
+            child: piecesList[index] == null ? null : piecesList[index].container,
+          ),
         ),
       ),
     );
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-//          diceNum = gameState.throwDice();
-//          if (!called) {
-//            p = gameState.addPiece(widget.pt);
-//            called = true;
-//          }
-//          gameState.movePiece(p, diceNum);
-//          gameState.canDelete(p.location);
-        });
-      },
-      child: Container(
-        height: kHomeWidth,
-        width: kHomeWidth,
-        decoration: BoxDecoration(
-          color: gameState.getTurn() == widget.pt ? trans : widget.c,
-          boxShadow: [
-            BoxShadow(
-              color: white,
-            ),
-            BoxShadow(
-              color: widget.c,
-              blurRadius: 15,
-              spreadRadius: -10,
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Column(
-              children: widgetPieceList,
-            ),
-          ],
-        ),
+    return Container(
+      height: kHomeWidth,
+      width: kHomeWidth,
+      decoration: BoxDecoration(
+        color: gameState.getTurn() == widget.pt ? trans : widget.c,
+        boxShadow: [
+          BoxShadow(
+            color: white,
+          ),
+          BoxShadow(
+            color: widget.c,
+            blurRadius: 15,
+            spreadRadius: -10,
+          ),
+        ],
+      ),
+      child: GridView.count(
+        crossAxisCount: 2,
+        crossAxisSpacing: 10.0,
+        mainAxisSpacing: 10.0,
+//        childAspectRatio: 2,
+        padding: EdgeInsets.all(30),
+        children: widgetPieceList,
       ),
     );
   }

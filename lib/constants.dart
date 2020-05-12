@@ -26,10 +26,12 @@ const Color orange = Color(0xffff9f68);
 const kBoxWidth = 25.0;
 const kBoxBorderWidth = 1.0;
 const kHomeWidth = 160.0;
+const kPieceSize = 20.0;
+const kHomePieceOffset = 25.0;
 
 enum PieceType { Green, Blue, Red, Yellow }
 
-const kHomeLocation = 0;
+const kPieceHomeLocation = 0;
 
 const kStyle = TextStyle(
     fontSize: 15, color: Colors.black, decoration: TextDecoration.none);

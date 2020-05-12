@@ -12,8 +12,6 @@ class GameState extends ChangeNotifier {
   List<int> movesList = [];
   bool killToken = false;
 
-//  PieceType turn = getTurn();
-
   setStop(int id) {
     slotList[id - 1].isStop = true;
   }
@@ -36,22 +34,6 @@ class GameState extends ChangeNotifier {
 
   Slot getGreenEndSlot(int id) {
     return greenEndList[id - 1];
-  }
-
-  updateColDate(PieceType piece) {
-//    sheesh += 1;
-    switch (piece) {
-      case PieceType.Red:
-//        addPlayerPiece(2);
-        break;
-      case PieceType.Blue:
-        break;
-      case PieceType.Green:
-        break;
-      case PieceType.Yellow:
-        break;
-    }
-    notifyListeners();
   }
 
   initialize() {
@@ -104,13 +86,12 @@ class GameState extends ChangeNotifier {
   }
 
   void diceTap() {
+    killToken = false;
     PieceType turn = getTurn();
     bool canThrow = canThrowDice();
     if (!canThrow) return;
-//    if (canThrow) {
     int diceNum = throwDice();
     movesList.add(diceNum);
-//    }
     canThrow = canThrowDice();
     bool allPiecesAtHome;
     switch (turn) {
@@ -146,7 +127,7 @@ class GameState extends ChangeNotifier {
 
   canThrowDice() {
     if (killToken) {
-      killToken = false;
+//      killToken = false;
       return true;
     }
     if (movesList.isEmpty) return true;
@@ -219,22 +200,22 @@ class GameState extends ChangeNotifier {
     switch (pt) {
       case PieceType.Green: // 9
         availablePieces = greenPlayerPieces
-            .where((element) => element.location == kHomeLocation);
+            .where((element) => element.location == kPieceHomeLocation);
         homePosition = 9;
         break;
       case PieceType.Blue: // 22
         availablePieces = bluePlayerPieces
-            .where((element) => element.location == kHomeLocation);
+            .where((element) => element.location == kPieceHomeLocation);
         homePosition = 22;
         break;
       case PieceType.Red: // 35
         availablePieces = redPlayerPieces
-            .where((element) => element.location == kHomeLocation);
+            .where((element) => element.location == kPieceHomeLocation);
         homePosition = 35;
         break;
       case PieceType.Yellow: // 48
         availablePieces = yellowPlayerPieces
-            .where((element) => element.location == kHomeLocation);
+            .where((element) => element.location == kPieceHomeLocation);
         homePosition = 48;
         break;
     }
@@ -273,25 +254,6 @@ class GameState extends ChangeNotifier {
     int num = math.Random().nextInt(6) + 1;
     print('threw $num');
     return num;
-  }
-
-  static Color getColor(PieceType pt) {
-    switch (pt) {
-      case PieceType.Green:
-        return green;
-        break;
-      case PieceType.Blue:
-        return blue;
-        break;
-      case PieceType.Red:
-        return red1;
-        break;
-      case PieceType.Yellow:
-        return yellow;
-        break;
-      default:
-        return white;
-    }
   }
 
   generatePlayerPieces() {
@@ -392,16 +354,16 @@ class GameState extends ChangeNotifier {
       CustomBox(getSlot(27)),
       CustomBox(getSlot(28)),
       CustomBox(getSlot(29)),
-      CustomBox(getSlot(30), c: red1),
+      CustomBox(getSlot(30), c: PlayerPiece.getColor(PieceType.Red)),
       CustomBox(getSlot(31)),
       CustomBox(getSlot(32)),
     ];
     _redColumn2 = [
-      CustomBox(getRedEndSlot(5), c: red1),
-      CustomBox(getRedEndSlot(4), c: red1),
-      CustomBox(getRedEndSlot(3), c: red1),
-      CustomBox(getRedEndSlot(2), c: red1),
-      CustomBox(getRedEndSlot(1), c: red1),
+      CustomBox(getRedEndSlot(5), c: PlayerPiece.getColor(PieceType.Red)),
+      CustomBox(getRedEndSlot(4), c: PlayerPiece.getColor(PieceType.Red)),
+      CustomBox(getRedEndSlot(3), c: PlayerPiece.getColor(PieceType.Red)),
+      CustomBox(getRedEndSlot(2), c: PlayerPiece.getColor(PieceType.Red)),
+      CustomBox(getRedEndSlot(1), c: PlayerPiece.getColor(PieceType.Red)),
       CustomBox(getSlot(33)),
     ];
     _redColumn3 = [
@@ -409,23 +371,23 @@ class GameState extends ChangeNotifier {
       CustomBox(getSlot(38)),
       CustomBox(getSlot(37)),
       CustomBox(getSlot(36)),
-      CustomBox(getSlot(35), c: red1),
+      CustomBox(getSlot(35), c: PlayerPiece.getColor(PieceType.Red)),
       CustomBox(getSlot(34)),
     ];
     _yellowColumn1 = [
       CustomBox(getSlot(40)),
       CustomBox(getSlot(41)),
       CustomBox(getSlot(42)),
-      CustomBox(getSlot(43), c: yellow),
+      CustomBox(getSlot(43), c: PlayerPiece.getColor(PieceType.Yellow)),
       CustomBox(getSlot(44)),
       CustomBox(getSlot(45)),
     ];
     _yellowColumn2 = [
-      CustomBox(getRedEndSlot(5), c: yellow),
-      CustomBox(getRedEndSlot(4), c: yellow),
-      CustomBox(getRedEndSlot(3), c: yellow),
-      CustomBox(getRedEndSlot(2), c: yellow),
-      CustomBox(getRedEndSlot(1), c: yellow),
+      CustomBox(getRedEndSlot(5), c: PlayerPiece.getColor(PieceType.Yellow)),
+      CustomBox(getRedEndSlot(4), c: PlayerPiece.getColor(PieceType.Yellow)),
+      CustomBox(getRedEndSlot(3), c: PlayerPiece.getColor(PieceType.Yellow)),
+      CustomBox(getRedEndSlot(2), c: PlayerPiece.getColor(PieceType.Yellow)),
+      CustomBox(getRedEndSlot(1), c: PlayerPiece.getColor(PieceType.Yellow)),
       CustomBox(getSlot(46)),
     ];
     _yellowColumn3 = [
@@ -433,7 +395,7 @@ class GameState extends ChangeNotifier {
       CustomBox(getSlot(51)),
       CustomBox(getSlot(50)),
       CustomBox(getSlot(49)),
-      CustomBox(getSlot(48), c: yellow),
+      CustomBox(getSlot(48), c: PlayerPiece.getColor(PieceType.Yellow)),
       CustomBox(getSlot(47)),
     ];
 
@@ -441,16 +403,16 @@ class GameState extends ChangeNotifier {
       CustomBox(getSlot(1)),
       CustomBox(getSlot(2)),
       CustomBox(getSlot(3)),
-      CustomBox(getSlot(4), c: green),
+      CustomBox(getSlot(4), c: PlayerPiece.getColor(PieceType.Green)),
       CustomBox(getSlot(5)),
       CustomBox(getSlot(6)),
     ];
     _greenColumn2 = [
-      CustomBox(getRedEndSlot(5), c: green),
-      CustomBox(getRedEndSlot(4), c: green),
-      CustomBox(getRedEndSlot(3), c: green),
-      CustomBox(getRedEndSlot(2), c: green),
-      CustomBox(getRedEndSlot(1), c: green),
+      CustomBox(getRedEndSlot(5), c: PlayerPiece.getColor(PieceType.Green)),
+      CustomBox(getRedEndSlot(4), c: PlayerPiece.getColor(PieceType.Green)),
+      CustomBox(getRedEndSlot(3), c: PlayerPiece.getColor(PieceType.Green)),
+      CustomBox(getRedEndSlot(2), c: PlayerPiece.getColor(PieceType.Green)),
+      CustomBox(getRedEndSlot(1), c: PlayerPiece.getColor(PieceType.Green)),
       CustomBox(getSlot(7)),
     ];
     _greenColumn3 = [
@@ -458,7 +420,7 @@ class GameState extends ChangeNotifier {
       CustomBox(getSlot(12)),
       CustomBox(getSlot(11)),
       CustomBox(getSlot(10)),
-      CustomBox(getSlot(9), c: green),
+      CustomBox(getSlot(9), c: PlayerPiece.getColor(PieceType.Green)),
       CustomBox(getSlot(8)),
     ];
 
@@ -466,16 +428,16 @@ class GameState extends ChangeNotifier {
       CustomBox(getSlot(14)),
       CustomBox(getSlot(15)),
       CustomBox(getSlot(16)),
-      CustomBox(getSlot(17), c: blue),
+      CustomBox(getSlot(17), c: PlayerPiece.getColor(PieceType.Blue)),
       CustomBox(getSlot(18)),
       CustomBox(getSlot(19)),
     ];
     _blueColumn2 = [
-      CustomBox(getRedEndSlot(5), c: blue),
-      CustomBox(getRedEndSlot(4), c: blue),
-      CustomBox(getRedEndSlot(3), c: blue),
-      CustomBox(getRedEndSlot(2), c: blue),
-      CustomBox(getRedEndSlot(1), c: blue),
+      CustomBox(getRedEndSlot(5), c: PlayerPiece.getColor(PieceType.Blue)),
+      CustomBox(getRedEndSlot(4), c: PlayerPiece.getColor(PieceType.Blue)),
+      CustomBox(getRedEndSlot(3), c: PlayerPiece.getColor(PieceType.Blue)),
+      CustomBox(getRedEndSlot(2), c: PlayerPiece.getColor(PieceType.Blue)),
+      CustomBox(getRedEndSlot(1), c: PlayerPiece.getColor(PieceType.Blue)),
       CustomBox(getSlot(20)),
     ];
     _blueColumn3 = [
@@ -483,7 +445,7 @@ class GameState extends ChangeNotifier {
       CustomBox(getSlot(25)),
       CustomBox(getSlot(24)),
       CustomBox(getSlot(23)),
-      CustomBox(getSlot(22), c: blue),
+      CustomBox(getSlot(22), c: PlayerPiece.getColor(PieceType.Blue)),
       CustomBox(getSlot(21)),
     ];
   }
