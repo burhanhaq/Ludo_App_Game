@@ -46,7 +46,7 @@ class _PieceHomeState extends State<PieceHome> {
         });
         break;
     }
-    for (int i = 0; i < 4 - piecesList.length; i++) {
+    while (piecesList.length < 4) {
       piecesList.add(null);
     }
     List<Widget> widgetPieceList = List.generate(
@@ -82,6 +82,8 @@ class _PieceHomeState extends State<PieceHome> {
             spreadRadius: -10,
           ),
         ],
+        borderRadius: BorderRadius.all(Radius.circular(5.0)),
+//        border: Border.all(), // todo all cool border color
       ),
       child: GridView.count(
         crossAxisCount: 2,

@@ -6,11 +6,18 @@ import 'constants.dart';
 import 'slot.dart';
 import 'custom_box.dart';
 import 'player_piece.dart';
+import 'fire_helper.dart';
 
 class GameState extends ChangeNotifier {
   List<Slot> slotList = List.generate(13 * 4, (index) => Slot(id: index + 1));
   List<int> movesList = [];
   bool killToken = false;
+  List<PieceType> pieceTurn = [
+    PieceType.Green,
+    PieceType.Blue,
+    PieceType.Red,
+    PieceType.Yellow
+  ];
 
   setStop(int id) {
     slotList[id - 1].isStop = true;
@@ -53,13 +60,6 @@ class GameState extends ChangeNotifier {
     setStop(48);
   }
 
-  List<PieceType> pieceTurn = [
-    PieceType.Green,
-    PieceType.Blue,
-    PieceType.Red,
-    PieceType.Yellow
-  ];
-
   PieceType getTurn() {
     return pieceTurn[0];
   }
@@ -96,10 +96,8 @@ class GameState extends ChangeNotifier {
     bool allPiecesAtHome;
     switch (turn) {
       case PieceType.Green:
-        allPiecesAtHome = greenPlayerPieces.every((element) {
-          print(element.toString());
-          return element.isAtHome();
-        });
+        allPiecesAtHome =
+            greenPlayerPieces.every((element) => element.isAtHome());
         break;
       case PieceType.Blue:
         allPiecesAtHome =
@@ -114,7 +112,6 @@ class GameState extends ChangeNotifier {
             yellowPlayerPieces.every((element) => element.isAtHome());
         break;
     }
-    print('ALL HOME: $allPiecesAtHome');
     if (allPiecesAtHome && !canThrow && !movesList.contains(6)) {
       print('clearing: $movesList');
       movesList.clear();
@@ -147,7 +144,6 @@ class GameState extends ChangeNotifier {
     notifyListeners();
     return true;
   }
-
 
   changeTurn() {
     PieceType pt = pieceTurn.removeAt(0);
