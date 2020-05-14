@@ -6,18 +6,12 @@ class PlayerPiece {
   int pieceId;
   Widget container;
   int location;
-  Function func;
   PieceType pieceTurn;
+  bool isAtEnd;
 
-  PlayerPiece(
-      {this.pieceType,
-      this.pieceId,
-      this.location,
-      this.func,
-      this.pieceTurn}) {
-    if (this.location == null) {
-      this.location = 0;
-    }
+  PlayerPiece({this.pieceId, this.pieceType, this.pieceTurn}) {
+    location = 0;
+    isAtEnd = false;
     Color c = getColor(this.pieceType);
     container = Container(
       height: kPieceSize,

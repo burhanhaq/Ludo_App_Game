@@ -26,7 +26,7 @@ class _CustomBoxState extends State<CustomBox> {
     } else if (widget.slot.isEnd) {
       text = 'E';
     }
-    text = '';
+//    text = '';
     Widget textWidget = Text(
       text,
       style: TextStyle(
@@ -35,18 +35,17 @@ class _CustomBoxState extends State<CustomBox> {
         decoration: TextDecoration.none,
       ),
     );
-    var value = 0.0;
+    var offsetValue = 0.0;
     List<Widget> playerPieceListWidget =
         List.generate(widget.slot.playerPieceList.length, (index) {
-      value += 4.0;
+      offsetValue += 4.0;
       return Positioned(
-        top: value,
+        top: offsetValue,
         child: IgnorePointer(
           child: widget.slot.playerPieceList[index].container,
         ),
       );
     });
-
     List<Widget> stackList = [textWidget] + playerPieceListWidget;
     PieceType turn = gameState.getTurn();
     bool containsPiece =

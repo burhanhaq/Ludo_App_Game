@@ -35,7 +35,6 @@ class Home extends StatelessWidget {
         num: gameState.movesList[index],
       ),
     );
-    listenToList();
     return SafeArea(
       child: Container(
         color: grey,
@@ -148,27 +147,27 @@ class Home extends StatelessWidget {
                 onTap: gameState.diceTap,
                 child: Dice(size: 100, c: stateColor),
               ),
-              GestureDetector(
-                onTap: Fire.instance.run,
-                child: Container(
-                  color: blue,
-                  height: 200,
-                  width: 200,
-                  child: StreamBuilder(
-                    stream: Fire.instance.gameStream('1589373131638'),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<DocumentSnapshot> snapshot) {
-                      if (snapshot.hasData) {
-                        var x = snapshot.data.data['moves_list'];
-                        return ListView(
-                          children: [Text(x)],
-                        );
-                      }
-                      return Text('nothing to show');
-                    },
-                  ),
-                ),
-              ),
+//              GestureDetector(
+//                onTap: Fire.instance.run,
+//                child: Container(
+//                  color: blue,
+//                  height: 200,
+//                  width: 200,
+//                  child: StreamBuilder(
+//                    stream: Fire.instance.gameStream('1589373131638'),
+//                    builder: (BuildContext context,
+//                        AsyncSnapshot<DocumentSnapshot> snapshot) {
+//                      if (snapshot.hasData) {
+//                        var x = snapshot.data.data['moves_list'];
+//                        return ListView(
+//                          children: [Text(x)],
+//                        );
+//                      }
+//                      return Text('nothing to show');
+//                    },
+//                  ),
+//                ),
+//              ),
             ],
           ),
         ),

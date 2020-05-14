@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ludo_app/column_area.dart';
-import 'package:provider/provider.dart';
 
 import 'constants.dart';
-import 'piece_home.dart';
-import 'game_state.dart';
 
 class Dice extends StatefulWidget {
   double size;

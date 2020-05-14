@@ -3,10 +3,10 @@ import 'package:provider/provider.dart';
 
 import 'constants.dart';
 import 'game_state.dart';
-import 'slot.dart';
 
 class ColumnArea extends StatefulWidget {
   final PieceType piece;
+
   ColumnArea({@required this.piece});
 
   @override
@@ -14,8 +14,6 @@ class ColumnArea extends StatefulWidget {
 }
 
 class _ColumnAreaState extends State<ColumnArea> {
-  var index = 0;
-
   @override
   Widget build(BuildContext context) {
     var gameState = Provider.of<GameState>(context);

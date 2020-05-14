@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
-import 'slot.dart';
-import 'column_area.dart';
-import 'custom_box.dart';
-
 var rand = math.Random(DateTime.now().millisecondsSinceEpoch);
 
 const double kEndSpacing = 30.0;
