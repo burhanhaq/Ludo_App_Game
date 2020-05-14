@@ -34,3 +34,6 @@ const kStyle = TextStyle(
 
 const kSmallDiceSize = 40.0;
 const kNumPlayerPieces = 4;
+
+const MAX_LOC = 6;
+const MAX_DICE_NUM = 6;

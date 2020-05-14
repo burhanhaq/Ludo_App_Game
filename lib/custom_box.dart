@@ -22,9 +22,7 @@ class _CustomBoxState extends State<CustomBox> {
     GameState gameState = Provider.of<GameState>(context);
     var text = widget.slot.id.toString();
     if (widget.slot.isStop) {
-      text = 'S';
-    } else if (widget.slot.isEnd) {
-      text = 'E';
+//      text = 'S';
     }
 //    text = '';
     Widget textWidget = Text(

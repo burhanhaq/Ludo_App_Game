@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:math' as math;
 
 import 'column_area.dart';
@@ -53,7 +52,21 @@ class GameState extends ChangeNotifier {
 
   setPieceOnEndSlot(PlayerPiece pp, int id) {
     pp.location = id;
-    getYellowEndSlot(id).playerPieceList.add(pp);
+    pp.isAtEndColumn = true;
+    switch (pp.pieceType) {
+      case PieceType.Green:
+        getGreenEndSlot(id).playerPieceList.add(pp);
+        break;
+      case PieceType.Blue:
+        getBlueEndSlot(id).playerPieceList.add(pp);
+        break;
+      case PieceType.Red:
+        getRedEndSlot(id).playerPieceList.add(pp);
+        break;
+      case PieceType.Yellow:
+        getYellowEndSlot(id).playerPieceList.add(pp);
+        break;
+    }
     notifyListeners();
   }
 
@@ -73,11 +86,17 @@ class GameState extends ChangeNotifier {
     _setStop(43);
     _setStop(48);
 
-    setPieceOnSlot(greenPlayerPieces[0], 5);
-    setPieceOnSlot(bluePlayerPieces[0], 18);
-    setPieceOnSlot(redPlayerPieces[0], 32);
-    setPieceOnSlot(yellowPlayerPieces[0], 45);
-//    setPieceOnEndSlot(redPlayerPieces[2], 3);
+//    setPieceOnSlot(greenPlayerPieces[0], 22);
+////    setPieceOnSlot(greenPlayerPieces[1], 10);
+////    setPieceOnSlot(bluePlayerPieces[0], 22);
+////    setPieceOnSlot(bluePlayerPieces[1], 22);
+////    setPieceOnSlot(bluePlayerPieces[0], 18);
+////    setPieceOnSlot(redPlayerPieces[0], 32);
+////    setPieceOnSlot(yellowPlayerPieces[0], 45);
+//    setPieceOnEndSlot(greenPlayerPieces[2], 5);
+//    setPieceOnEndSlot(bluePlayerPieces[2], 5);
+//    setPieceOnEndSlot(redPlayerPieces[2], 5);
+//    setPieceOnEndSlot(yellowPlayerPieces[2], 5);
   }
 
   PieceType getTurn() {
@@ -85,7 +104,7 @@ class GameState extends ChangeNotifier {
   }
 
   pieceTap(PlayerPiece pp) {
-    print('Tapped Piece');
+    print('Tapped Slot');
     if (pp == null) return;
     if (canThrowDice()) return;
     if (pp.pieceType == getTurn()) {
@@ -105,34 +124,52 @@ class GameState extends ChangeNotifier {
     }
   }
 
+  canAnyPieceMove(PieceType pt) {
+    if (throwDiceToken) return true;
+    if (movesList.isEmpty) return false;
+    bool anyPieceCanMove;
+    List list;
+    switch (pt) {
+      case PieceType.Green:
+        list = greenPlayerPieces;
+        break;
+      case PieceType.Blue:
+        list = bluePlayerPieces;
+        break;
+      case PieceType.Red:
+        list = redPlayerPieces;
+        break;
+      case PieceType.Yellow:
+        list = yellowPlayerPieces;
+        break;
+    }
+
+    anyPieceCanMove = list.any((element) =>
+        (!element.isAtHome() && // (some piece not at home and
+            !element.runComplete && // some piece run not complete and
+            (element.isAtEndColumn && // (some piece at end column and
+                    movesList
+                        .every((move) => element.location <= MAX_LOC - move) || // every move > than location) or
+                !element.isAtEndColumn)) || // some piece not at end column) or
+        movesList.contains(6) && list.any((element) => element.isAtHome())); // can move 6 and some piece at home
+//    if (!anyPieceCanMove) {
+//      anyPieceCanMove =
+//          ;
+//    }
+
+    return anyPieceCanMove;
+  }
+
   void diceTap() {
-    throwDiceToken = false;
     PieceType turn = getTurn();
     bool canThrow = canThrowDice();
+    throwDiceToken = false;
     if (!canThrow) return;
     int diceNum = throwDice();
     movesList.add(diceNum);
     canThrow = canThrowDice();
-    bool allPiecesAtHome;
-    switch (turn) {
-      case PieceType.Green:
-        allPiecesAtHome =
-            greenPlayerPieces.every((element) => element.isAtHome());
-        break;
-      case PieceType.Blue:
-        allPiecesAtHome =
-            bluePlayerPieces.every((element) => element.isAtHome());
-        break;
-      case PieceType.Red:
-        allPiecesAtHome =
-            redPlayerPieces.every((element) => element.isAtHome());
-        break;
-      case PieceType.Yellow:
-        allPiecesAtHome =
-            yellowPlayerPieces.every((element) => element.isAtHome());
-        break;
-    }
-    if (allPiecesAtHome && !canThrow && !movesList.contains(6)) {
+    bool anyPieceCanMove = canAnyPieceMove(turn);
+    if (!canThrow && !movesList.contains(6) && !anyPieceCanMove) {
       print('clearing: $movesList');
       movesList.clear();
     }
@@ -143,10 +180,8 @@ class GameState extends ChangeNotifier {
   }
 
   canThrowDice() {
-    if (throwDiceToken) {
-//      killToken = false;
-      return true;
-    }
+    if (throwDiceToken) return true;
+
     if (movesList.isEmpty) return true;
     if (movesList.last != 6) return false;
     int len = movesList.length;
@@ -166,8 +201,7 @@ class GameState extends ChangeNotifier {
   }
 
   changeTurn() {
-    PieceType pt = pieceTurn.removeAt(0);
-    pieceTurn.add(pt);
+    pieceTurn.add(pieceTurn.removeAt(0));
     movesList.clear();
   }
 
@@ -212,26 +246,24 @@ class GameState extends ChangeNotifier {
     int homePosition;
     switch (pt) {
       case PieceType.Green: // 9
-        availablePieces = greenPlayerPieces
-            .where((element) => element.location == kPieceHomeLocation);
+        availablePieces = greenPlayerPieces;
         homePosition = 9;
         break;
       case PieceType.Blue: // 22
-        availablePieces = bluePlayerPieces
-            .where((element) => element.location == kPieceHomeLocation);
+        availablePieces = bluePlayerPieces;
         homePosition = 22;
         break;
       case PieceType.Red: // 35
-        availablePieces = redPlayerPieces
-            .where((element) => element.location == kPieceHomeLocation);
+        availablePieces = redPlayerPieces;
         homePosition = 35;
         break;
       case PieceType.Yellow: // 48
-        availablePieces = yellowPlayerPieces
-            .where((element) => element.location == kPieceHomeLocation);
+        availablePieces = yellowPlayerPieces;
         homePosition = 48;
         break;
     }
+    availablePieces = availablePieces
+        .where((element) => element.location == kPieceHomeLocation);
     if (availablePieces.length > 0) {
       pp = availablePieces.first;
       pp.location = homePosition;
@@ -244,25 +276,27 @@ class GameState extends ChangeNotifier {
   }
 
   movePiece(PlayerPiece pp, int moveDistance) {
-    if (pp.isAtEnd) {
-      moveInEndPiece(pp, moveDistance);
-    } else if (checkRunFinished(pp, moveDistance)) {
-      moveToEndPiece(pp, moveDistance);
+    if (pp.isAtEndColumn) {
+      movePieceInEndCol(pp, moveDistance);
+    } else if (checkAddToEndCol(pp, moveDistance)) {
+      movePieceToEndCol(pp, moveDistance);
     } else {
       int curLocation = pp.location;
       int newLocation = curLocation + moveDistance;
       if (newLocation > 52) {
         newLocation -= 52;
       }
-      getSlot(curLocation).playerPieceList.remove(pp);
       pp.location = newLocation;
+      getSlot(curLocation).playerPieceList.remove(pp);
       getSlot(newLocation).playerPieceList.add(pp);
       movesList.remove(moveDistance);
       if (canDelete(pp.location)) {
         deleteBottomPieces(pp.location);
       }
     }
-    if (movesList.isEmpty && !throwDiceToken) {
+    bool anyPieceCanMove = canAnyPieceMove(pp.pieceType);
+    if (!anyPieceCanMove) {
+      // !throwDiceToken &&
       changeTurn();
     }
 
@@ -270,15 +304,71 @@ class GameState extends ChangeNotifier {
   }
 
   int throwDice() {
-    int num = math.Random().nextInt(6) + 1;
+    int num = math.Random().nextInt(MAX_DICE_NUM) + 1;
     print('threw $num');
     return num;
   }
 
-  moveInEndPiece(PlayerPiece pp, int moveDistance) {}
+  movePieceInEndCol(PlayerPiece pp, int moveDistance) {
+    int curLocation = pp.location;
+    int newLocation = curLocation + moveDistance;
+    if (newLocation == MAX_LOC) {
+      // won
+      throwDiceToken = true;
+      pp.runComplete = true;
+      pp.isAtEndColumn = false;
+      pp.location = newLocation;
+      switch (pp.pieceType) {
+        case PieceType.Green:
+          getGreenEndSlot(curLocation).playerPieceList.remove(pp);
+          getGreenEndSlot(newLocation).playerPieceList.add(pp);
+          break;
+        case PieceType.Blue:
+          getBlueEndSlot(curLocation).playerPieceList.remove(pp);
+          getBlueEndSlot(newLocation).playerPieceList.add(pp);
+          break;
+        case PieceType.Red:
+          getRedEndSlot(curLocation).playerPieceList.remove(pp);
+          getRedEndSlot(newLocation).playerPieceList.add(pp);
+          break;
+        case PieceType.Yellow:
+          getYellowEndSlot(curLocation).playerPieceList.remove(pp);
+          getYellowEndSlot(newLocation).playerPieceList.add(pp);
+          break;
+      }
+      movesList.remove(moveDistance);
+    } else if (newLocation < MAX_LOC) {
+      // move forward
+      pp.location = newLocation;
+      switch (pp.pieceType) {
+        case PieceType.Green:
+          getGreenEndSlot(curLocation).playerPieceList.remove(pp);
+          getGreenEndSlot(newLocation).playerPieceList.add(pp);
+          break;
+        case PieceType.Blue:
+          getBlueEndSlot(curLocation).playerPieceList.remove(pp);
+          getBlueEndSlot(newLocation).playerPieceList.add(pp);
+          break;
+        case PieceType.Red:
+          getRedEndSlot(curLocation).playerPieceList.remove(pp);
+          getRedEndSlot(newLocation).playerPieceList.add(pp);
+          break;
+        case PieceType.Yellow:
+          getYellowEndSlot(curLocation).playerPieceList.remove(pp);
+          getYellowEndSlot(newLocation).playerPieceList.add(pp);
+          break;
+      }
+      movesList.remove(moveDistance);
+    } else {
+      // newDistance > maxLocation, don't move forward
+      // todo cancel turn if no more moves/pieces outside
 
-  moveToEndPiece(PlayerPiece pp, int moveDistance) {
-    pp.isAtEnd = true;
+    }
+    notifyListeners();
+  }
+
+  movePieceToEndCol(PlayerPiece pp, int moveDistance) {
+    pp.isAtEndColumn = true;
     int curLocation = pp.location;
     switch (pp.pieceType) {
       case PieceType.Green:
@@ -313,7 +403,7 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  checkRunFinished(PlayerPiece pp, int moveDistance) {
+  checkAddToEndCol(PlayerPiece pp, int moveDistance) {
     int curLocation = pp.location;
     int newLocation = curLocation + moveDistance;
     switch (pp.pieceType) {
@@ -326,7 +416,6 @@ class GameState extends ChangeNotifier {
       case PieceType.Red:
         if (curLocation < 34 && newLocation >= 34) return true;
         break;
-
       case PieceType.Yellow:
         if (curLocation < 47 && newLocation >= 47) return true;
         break;
@@ -341,7 +430,7 @@ class GameState extends ChangeNotifier {
       (index) => PlayerPiece(
         pieceId: index,
         pieceType: PieceType.Green,
-        pieceTurn: getTurn(),
+//        pieceTurn: getTurn(),
       ),
     );
     bluePlayerPieces = List.generate(
@@ -349,7 +438,7 @@ class GameState extends ChangeNotifier {
       (index) => PlayerPiece(
         pieceId: index,
         pieceType: PieceType.Blue,
-        pieceTurn: getTurn(),
+//        pieceTurn: getTurn(),
       ),
     );
     redPlayerPieces = List.generate(
@@ -357,7 +446,7 @@ class GameState extends ChangeNotifier {
       (index) => PlayerPiece(
         pieceId: index,
         pieceType: PieceType.Red,
-        pieceTurn: getTurn(),
+//        pieceTurn: getTurn(),
       ),
     );
     yellowPlayerPieces = List.generate(
@@ -365,7 +454,7 @@ class GameState extends ChangeNotifier {
       (index) => PlayerPiece(
         pieceId: index,
         pieceType: PieceType.Yellow,
-        pieceTurn: getTurn(),
+//        pieceTurn: getTurn(),
       ),
     );
   }

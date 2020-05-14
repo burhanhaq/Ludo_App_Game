@@ -6,12 +6,15 @@ class PlayerPiece {
   int pieceId;
   Widget container;
   int location;
-  PieceType pieceTurn;
-  bool isAtEnd;
 
-  PlayerPiece({this.pieceId, this.pieceType, this.pieceTurn}) {
+//  PieceType pieceTurn;
+  bool isAtEndColumn;
+  bool runComplete;
+
+  PlayerPiece({this.pieceId, this.pieceType}) {
     location = 0;
-    isAtEnd = false;
+    isAtEndColumn = false;
+    runComplete = false;
     Color c = getColor(this.pieceType);
     container = Container(
       height: kPieceSize,
@@ -38,26 +41,34 @@ class PlayerPiece {
   }
 
   @override
-  String toString() {
-    return '${pieceId.toString()} - loc:${location.toString()} - ${pieceType} home:${isAtHome()}';
-  }
+  String toString() =>
+      '${pieceId.toString()} @ ${location.toString()} - $pieceType';
 
   static Color getColor(PieceType pt) {
     switch (pt) {
       case PieceType.Green:
         return green;
-        break;
       case PieceType.Blue:
         return blue;
-        break;
       case PieceType.Red:
-        return red12;
-        break;
+        return red1;
       case PieceType.Yellow:
-        return yellow2;
-        break;
+        return yellow;
       default:
         return white;
     }
   }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (this.pieceId == other.pieceId) {
+     if (this.pieceType == other.pieceType) {
+       return true;
+     }
+    }
+    return false;
+  }
+
+  @override
+  int get hashCode => 31 * 17 + pieceId.hashCode;
 }
