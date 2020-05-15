@@ -86,13 +86,13 @@ class GameState extends ChangeNotifier {
     _setStop(43);
     _setStop(48);
 
-//    setPieceOnSlot(greenPlayerPieces[0], 22);
-////    setPieceOnSlot(greenPlayerPieces[1], 10);
-////    setPieceOnSlot(bluePlayerPieces[0], 22);
-////    setPieceOnSlot(bluePlayerPieces[1], 22);
-////    setPieceOnSlot(bluePlayerPieces[0], 18);
-////    setPieceOnSlot(redPlayerPieces[0], 32);
-////    setPieceOnSlot(yellowPlayerPieces[0], 45);
+    setPieceOnSlot(greenPlayerPieces[0], 6);
+//    setPieceOnSlot(greenPlayerPieces[1], 10);
+    setPieceOnSlot(bluePlayerPieces[0], 19);
+//    setPieceOnSlot(yellowPlayerPieces[1], 22);
+    setPieceOnSlot(yellowPlayerPieces[0], 45);
+    setPieceOnSlot(redPlayerPieces[0], 32);
+//    setPieceOnSlot(yellowPlayerPieces[0], 45);
 //    setPieceOnEndSlot(greenPlayerPieces[2], 5);
 //    setPieceOnEndSlot(bluePlayerPieces[2], 5);
 //    setPieceOnEndSlot(redPlayerPieces[2], 5);
@@ -144,18 +144,20 @@ class GameState extends ChangeNotifier {
         break;
     }
 
+    if (movesList.contains(6) && list.any((element) => element.isAtHome())) {
+      // can move 6 and some piece at home
+      return true;
+    }
+
     anyPieceCanMove = list.any((element) =>
-        (!element.isAtHome() && // (some piece not at home and
+            !element.isAtHome() && // some piece not at home and
             !element.runComplete && // some piece run not complete and
             (element.isAtEndColumn && // (some piece at end column and
-                    movesList
-                        .every((move) => element.location <= MAX_LOC - move) || // every move > than location) or
-                !element.isAtEndColumn)) || // some piece not at end column) or
-        movesList.contains(6) && list.any((element) => element.isAtHome())); // can move 6 and some piece at home
-//    if (!anyPieceCanMove) {
-//      anyPieceCanMove =
-//          ;
-//    }
+                    movesList.every((move) =>
+                        element.location <=
+                        MAX_LOC - move) || // every move > than location) or
+                !element.isAtEndColumn) // some piece not at end column
+        );
 
     return anyPieceCanMove;
   }
