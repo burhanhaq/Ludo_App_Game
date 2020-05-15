@@ -12,13 +12,8 @@ import 'fire_helper.dart';
 class GameState extends ChangeNotifier {
   List<Slot> slotList = List.generate(13 * 4, (index) => Slot(id: index + 1));
   List<int> movesList = [];
-  bool throwDiceToken = false;
-  List<PieceType> pieceTurn = [
-    PieceType.Green,
-    PieceType.Blue,
-    PieceType.Red,
-    PieceType.Yellow
-  ];
+  bool extraThrowToken = false;
+  List<PieceType> pieceTurn = [];
 
   _setStop(int id) {
     slotList[id - 1].isStop = true;
@@ -28,7 +23,7 @@ class GameState extends ChangeNotifier {
     return slotList[id - 1];
   }
 
-  Slot getPlayerEndSlot(PieceType pt, int id) {
+  Slot getEndSlot(PieceType pt, int id) {
     switch (pt) {
       case PieceType.Green:
         return greenEndList[id - 1];
@@ -51,11 +46,32 @@ class GameState extends ChangeNotifier {
   setPieceOnEndSlot(PlayerPiece pp, int id) {
     pp.location = id;
     pp.isAtEndColumn = true;
-    getPlayerEndSlot(pp.pieceType, id).playerPieceList.add(pp);
+    getEndSlot(pp.pieceType, id).playerPieceList.add(pp);
     notifyListeners();
   }
 
+  setTurnsForPlayers(int playerNum) {
+    switch (playerNum) {
+      case 2:
+        pieceTurn = [PieceType.Green, PieceType.Red];
+        break;
+      case 3:
+        pieceTurn = [PieceType.Green, PieceType.Blue, PieceType.Red];
+        break;
+      case 4:
+        pieceTurn = [
+          PieceType.Green,
+          PieceType.Blue,
+          PieceType.Red,
+          PieceType.Yellow
+        ];
+        break;
+    }
+  }
+
   initialize() {
+    setTurnsForPlayers(4);
+
     generatePlayerPieces();
     initColumn();
     // 1 - 13 green
@@ -110,10 +126,10 @@ class GameState extends ChangeNotifier {
   }
 
   canAnyPieceMove(PieceType pt) {
-    if (throwDiceToken) return true;
+    if (extraThrowToken) return true;
     if (movesList.isEmpty) return false;
     bool anyPieceCanMove;
-    List list;
+    List<PlayerPiece> list;
     switch (pt) {
       case PieceType.Green:
         list = greenPlayerPieces;
@@ -128,6 +144,8 @@ class GameState extends ChangeNotifier {
         list = yellowPlayerPieces;
         break;
     }
+
+    if (didPlayerWin(pt)) return false;
 
     if (movesList.contains(6) && list.any((element) => element.isAtHome())) {
       // can move 6 and some piece at home
@@ -150,7 +168,7 @@ class GameState extends ChangeNotifier {
   void diceTap() {
     PieceType turn = getTurn();
     bool canThrow = canThrowDice();
-    throwDiceToken = false;
+    extraThrowToken = false;
     if (!canThrow) return;
     int diceNum = throwDice();
     movesList.add(diceNum);
@@ -167,7 +185,7 @@ class GameState extends ChangeNotifier {
   }
 
   canThrowDice() {
-    if (throwDiceToken) return true;
+    if (extraThrowToken) return true;
 
     if (movesList.isEmpty) return true;
     if (movesList.last != 6) return false;
@@ -211,7 +229,7 @@ class GameState extends ChangeNotifier {
   }
 
   deleteBottomPieces(int slotId) {
-    throwDiceToken = true;
+    extraThrowToken = true;
     var pieceList = getSlot(slotId).playerPieceList;
     PlayerPiece topPiece = pieceList.last;
     List<PlayerPiece> otherPieces = [];
@@ -296,7 +314,11 @@ class GameState extends ChangeNotifier {
   }
 
   didPlayerWin(PieceType pt) {
-    var piecesList = getPlayerPieceList(pt);
+    return getPlayerPieceList(pt).every((element) => element.isRunComplete());
+  }
+
+  playerFinishedRun() {
+    pieceTurn.remove(getTurn());
   }
 
   movePieceInEndCol(PlayerPiece pp, int moveDistance) {
@@ -305,14 +327,19 @@ class GameState extends ChangeNotifier {
 
     if (newLocation > kMaxLoc) return;
     if (newLocation == kMaxLoc) {
+      // todo add piece to triangle end
       // won
-      throwDiceToken = true; // todo add this to movePieceToEndCol if piece wins
+      extraThrowToken =
+          true; // todo add this to movePieceToEndCol() if piece wins
       pp.isAtEndColumn = true;
+      if (didPlayerWin(pp.pieceType)) {
+        playerFinishedRun();
+      }
     }
     // newLocation <= MAX_LOC
     pp.location = newLocation;
-    getPlayerEndSlot(pp.pieceType, curLocation).playerPieceList.remove(pp);
-    getPlayerEndSlot(pp.pieceType, newLocation).playerPieceList.add(pp);
+    getEndSlot(pp.pieceType, curLocation).playerPieceList.remove(pp);
+    getEndSlot(pp.pieceType, newLocation).playerPieceList.add(pp);
     movesList.remove(moveDistance);
     notifyListeners();
   }
@@ -337,8 +364,11 @@ class GameState extends ChangeNotifier {
     }
     getSlot(curLocation).playerPieceList.remove(pp);
     pp.location = endLocation;
-    getPlayerEndSlot(pp.pieceType, endLocation).playerPieceList.add(pp);
+    getEndSlot(pp.pieceType, endLocation).playerPieceList.add(pp);
     movesList.remove(moveDistance);
+//    if (endLocation == 6) {
+//      return;
+//    }
     notifyListeners();
   }
 
@@ -476,15 +506,15 @@ class GameState extends ChangeNotifier {
       CustomBox(getSlot(6)),
     ];
     _greenColumn2 = [
-      CustomBox(getPlayerEndSlot(PieceType.Green, 5),
+      CustomBox(getEndSlot(PieceType.Green, 5),
           c: PlayerPiece.getColor(PieceType.Green)),
-      CustomBox(getPlayerEndSlot(PieceType.Green, 4),
+      CustomBox(getEndSlot(PieceType.Green, 4),
           c: PlayerPiece.getColor(PieceType.Green)),
-      CustomBox(getPlayerEndSlot(PieceType.Green, 3),
+      CustomBox(getEndSlot(PieceType.Green, 3),
           c: PlayerPiece.getColor(PieceType.Green)),
-      CustomBox(getPlayerEndSlot(PieceType.Green, 2),
+      CustomBox(getEndSlot(PieceType.Green, 2),
           c: PlayerPiece.getColor(PieceType.Green)),
-      CustomBox(getPlayerEndSlot(PieceType.Green, 1),
+      CustomBox(getEndSlot(PieceType.Green, 1),
           c: PlayerPiece.getColor(PieceType.Green)),
       CustomBox(getSlot(7)),
     ];
@@ -505,15 +535,15 @@ class GameState extends ChangeNotifier {
       CustomBox(getSlot(19)),
     ];
     _blueColumn2 = [
-      CustomBox(getPlayerEndSlot(PieceType.Blue, 5),
+      CustomBox(getEndSlot(PieceType.Blue, 5),
           c: PlayerPiece.getColor(PieceType.Blue)),
-      CustomBox(getPlayerEndSlot(PieceType.Blue, 4),
+      CustomBox(getEndSlot(PieceType.Blue, 4),
           c: PlayerPiece.getColor(PieceType.Blue)),
-      CustomBox(getPlayerEndSlot(PieceType.Blue, 3),
+      CustomBox(getEndSlot(PieceType.Blue, 3),
           c: PlayerPiece.getColor(PieceType.Blue)),
-      CustomBox(getPlayerEndSlot(PieceType.Blue, 2),
+      CustomBox(getEndSlot(PieceType.Blue, 2),
           c: PlayerPiece.getColor(PieceType.Blue)),
-      CustomBox(getPlayerEndSlot(PieceType.Blue, 1),
+      CustomBox(getEndSlot(PieceType.Blue, 1),
           c: PlayerPiece.getColor(PieceType.Blue)),
       CustomBox(getSlot(20)),
     ];
@@ -534,15 +564,15 @@ class GameState extends ChangeNotifier {
       CustomBox(getSlot(32)),
     ];
     _redColumn2 = [
-      CustomBox(getPlayerEndSlot(PieceType.Red, 5),
+      CustomBox(getEndSlot(PieceType.Red, 5),
           c: PlayerPiece.getColor(PieceType.Red)),
-      CustomBox(getPlayerEndSlot(PieceType.Red, 4),
+      CustomBox(getEndSlot(PieceType.Red, 4),
           c: PlayerPiece.getColor(PieceType.Red)),
-      CustomBox(getPlayerEndSlot(PieceType.Red, 3),
+      CustomBox(getEndSlot(PieceType.Red, 3),
           c: PlayerPiece.getColor(PieceType.Red)),
-      CustomBox(getPlayerEndSlot(PieceType.Red, 2),
+      CustomBox(getEndSlot(PieceType.Red, 2),
           c: PlayerPiece.getColor(PieceType.Red)),
-      CustomBox(getPlayerEndSlot(PieceType.Red, 1),
+      CustomBox(getEndSlot(PieceType.Red, 1),
           c: PlayerPiece.getColor(PieceType.Red)),
       CustomBox(getSlot(33)),
     ];
@@ -563,15 +593,15 @@ class GameState extends ChangeNotifier {
       CustomBox(getSlot(45)),
     ];
     _yellowColumn2 = [
-      CustomBox(getPlayerEndSlot(PieceType.Yellow, 5),
+      CustomBox(getEndSlot(PieceType.Yellow, 5),
           c: PlayerPiece.getColor(PieceType.Yellow)),
-      CustomBox(getPlayerEndSlot(PieceType.Yellow, 4),
+      CustomBox(getEndSlot(PieceType.Yellow, 4),
           c: PlayerPiece.getColor(PieceType.Yellow)),
-      CustomBox(getPlayerEndSlot(PieceType.Yellow, 3),
+      CustomBox(getEndSlot(PieceType.Yellow, 3),
           c: PlayerPiece.getColor(PieceType.Yellow)),
-      CustomBox(getPlayerEndSlot(PieceType.Yellow, 2),
+      CustomBox(getEndSlot(PieceType.Yellow, 2),
           c: PlayerPiece.getColor(PieceType.Yellow)),
-      CustomBox(getPlayerEndSlot(PieceType.Yellow, 1),
+      CustomBox(getEndSlot(PieceType.Yellow, 1),
           c: PlayerPiece.getColor(PieceType.Yellow)),
       CustomBox(getSlot(46)),
     ];
