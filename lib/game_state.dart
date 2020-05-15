@@ -312,7 +312,7 @@ class GameState extends ChangeNotifier {
     // newLocation <= MAX_LOC
     pp.location = newLocation;
     getPlayerEndSlot(pp.pieceType, curLocation).playerPieceList.remove(pp);
-    getPlayerEndSlot(pp.pieceType, curLocation).playerPieceList.add(pp);
+    getPlayerEndSlot(pp.pieceType, newLocation).playerPieceList.add(pp);
     movesList.remove(moveDistance);
     notifyListeners();
   }
