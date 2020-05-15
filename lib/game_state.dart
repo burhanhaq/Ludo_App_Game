@@ -28,20 +28,18 @@ class GameState extends ChangeNotifier {
     return slotList[id - 1];
   }
 
-  Slot getRedEndSlot(int id) {
-    return redEndList[id - 1];
-  }
-
-  Slot getBlueEndSlot(int id) {
-    return blueEndList[id - 1];
-  }
-
-  Slot getYellowEndSlot(int id) {
-    return yellowEndList[id - 1];
-  }
-
-  Slot getGreenEndSlot(int id) {
-    return greenEndList[id - 1];
+  Slot getPlayerEndSlot(PieceType pt, int id) {
+    switch (pt) {
+      case PieceType.Green:
+        return greenEndList[id - 1];
+      case PieceType.Blue:
+        return blueEndList[id - 1];
+      case PieceType.Red:
+        return redEndList[id - 1];
+      case PieceType.Yellow:
+        return yellowEndList[id - 1];
+    }
+    return null;
   }
 
   setPieceOnSlot(PlayerPiece pp, int id) {
@@ -53,20 +51,7 @@ class GameState extends ChangeNotifier {
   setPieceOnEndSlot(PlayerPiece pp, int id) {
     pp.location = id;
     pp.isAtEndColumn = true;
-    switch (pp.pieceType) {
-      case PieceType.Green:
-        getGreenEndSlot(id).playerPieceList.add(pp);
-        break;
-      case PieceType.Blue:
-        getBlueEndSlot(id).playerPieceList.add(pp);
-        break;
-      case PieceType.Red:
-        getRedEndSlot(id).playerPieceList.add(pp);
-        break;
-      case PieceType.Yellow:
-        getYellowEndSlot(id).playerPieceList.add(pp);
-        break;
-    }
+    getPlayerEndSlot(pp.pieceType, id).playerPieceList.add(pp);
     notifyListeners();
   }
 
@@ -93,7 +78,7 @@ class GameState extends ChangeNotifier {
     setPieceOnSlot(yellowPlayerPieces[0], 45);
     setPieceOnSlot(redPlayerPieces[0], 32);
 //    setPieceOnSlot(yellowPlayerPieces[0], 45);
-//    setPieceOnEndSlot(greenPlayerPieces[2], 5);
+    setPieceOnEndSlot(greenPlayerPieces[1], 2);
 //    setPieceOnEndSlot(bluePlayerPieces[2], 5);
 //    setPieceOnEndSlot(redPlayerPieces[2], 5);
 //    setPieceOnEndSlot(yellowPlayerPieces[2], 5);
@@ -151,11 +136,11 @@ class GameState extends ChangeNotifier {
 
     anyPieceCanMove = list.any((element) =>
             !element.isAtHome() && // some piece not at home and
-            !element.runComplete && // some piece run not complete and
+            !element.isRunComplete() && // some piece run not complete and
             (element.isAtEndColumn && // (some piece at end column and
                     movesList.every((move) =>
                         element.location <=
-                        MAX_LOC - move) || // every move > than location) or
+                        kMaxLoc - move) || // every move > than location) or
                 !element.isAtEndColumn) // some piece not at end column
         );
 
@@ -242,29 +227,29 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  addPiece(PieceType pt) {
-    PlayerPiece pp;
-    Iterable<PlayerPiece> availablePieces;
-    int homePosition;
+  int getHomePosition(PieceType pt) {
     switch (pt) {
       case PieceType.Green: // 9
-        availablePieces = greenPlayerPieces;
-        homePosition = 9;
+        return kGreenHomeLocation;
         break;
       case PieceType.Blue: // 22
-        availablePieces = bluePlayerPieces;
-        homePosition = 22;
+        return kBlueHomeLocation;
         break;
       case PieceType.Red: // 35
-        availablePieces = redPlayerPieces;
-        homePosition = 35;
+        return kRedHomeLocation;
         break;
       case PieceType.Yellow: // 48
-        availablePieces = yellowPlayerPieces;
-        homePosition = 48;
+        return kYellowHomeLocation;
         break;
     }
-    availablePieces = availablePieces
+    return -1;
+  }
+
+  addPiece(PieceType pt) {
+    PlayerPiece pp;
+    int homePosition = getHomePosition(pt);
+
+    Iterable<PlayerPiece> availablePieces = getPlayerPieceList(pt)
         .where((element) => element.location == kPieceHomeLocation);
     if (availablePieces.length > 0) {
       pp = availablePieces.first;
@@ -298,7 +283,6 @@ class GameState extends ChangeNotifier {
     }
     bool anyPieceCanMove = canAnyPieceMove(pp.pieceType);
     if (!anyPieceCanMove) {
-      // !throwDiceToken &&
       changeTurn();
     }
 
@@ -306,102 +290,55 @@ class GameState extends ChangeNotifier {
   }
 
   int throwDice() {
-    int num = math.Random().nextInt(MAX_DICE_NUM) + 1;
+    int num = math.Random().nextInt(kMaxDiceNum) + 1;
     print('threw $num');
     return num;
+  }
+
+  didPlayerWin(PieceType pt) {
+    var piecesList = getPlayerPieceList(pt);
   }
 
   movePieceInEndCol(PlayerPiece pp, int moveDistance) {
     int curLocation = pp.location;
     int newLocation = curLocation + moveDistance;
-    if (newLocation == MAX_LOC) {
-      // won
-      throwDiceToken = true;
-      pp.runComplete = true;
-      pp.isAtEndColumn = false;
-      pp.location = newLocation;
-      switch (pp.pieceType) {
-        case PieceType.Green:
-          getGreenEndSlot(curLocation).playerPieceList.remove(pp);
-          getGreenEndSlot(newLocation).playerPieceList.add(pp);
-          break;
-        case PieceType.Blue:
-          getBlueEndSlot(curLocation).playerPieceList.remove(pp);
-          getBlueEndSlot(newLocation).playerPieceList.add(pp);
-          break;
-        case PieceType.Red:
-          getRedEndSlot(curLocation).playerPieceList.remove(pp);
-          getRedEndSlot(newLocation).playerPieceList.add(pp);
-          break;
-        case PieceType.Yellow:
-          getYellowEndSlot(curLocation).playerPieceList.remove(pp);
-          getYellowEndSlot(newLocation).playerPieceList.add(pp);
-          break;
-      }
-      movesList.remove(moveDistance);
-    } else if (newLocation < MAX_LOC) {
-      // move forward
-      pp.location = newLocation;
-      switch (pp.pieceType) {
-        case PieceType.Green:
-          getGreenEndSlot(curLocation).playerPieceList.remove(pp);
-          getGreenEndSlot(newLocation).playerPieceList.add(pp);
-          break;
-        case PieceType.Blue:
-          getBlueEndSlot(curLocation).playerPieceList.remove(pp);
-          getBlueEndSlot(newLocation).playerPieceList.add(pp);
-          break;
-        case PieceType.Red:
-          getRedEndSlot(curLocation).playerPieceList.remove(pp);
-          getRedEndSlot(newLocation).playerPieceList.add(pp);
-          break;
-        case PieceType.Yellow:
-          getYellowEndSlot(curLocation).playerPieceList.remove(pp);
-          getYellowEndSlot(newLocation).playerPieceList.add(pp);
-          break;
-      }
-      movesList.remove(moveDistance);
-    } else {
-      // newDistance > maxLocation, don't move forward
-      // todo cancel turn if no more moves/pieces outside
 
+    if (newLocation > kMaxLoc) return;
+    if (newLocation == kMaxLoc) {
+      // won
+      throwDiceToken = true; // todo add this to movePieceToEndCol if piece wins
+      pp.isAtEndColumn = true;
     }
+    // newLocation <= MAX_LOC
+    pp.location = newLocation;
+    getPlayerEndSlot(pp.pieceType, curLocation).playerPieceList.remove(pp);
+    getPlayerEndSlot(pp.pieceType, curLocation).playerPieceList.add(pp);
+    movesList.remove(moveDistance);
     notifyListeners();
   }
 
   movePieceToEndCol(PlayerPiece pp, int moveDistance) {
     pp.isAtEndColumn = true;
     int curLocation = pp.location;
+    int endLocation;
     switch (pp.pieceType) {
       case PieceType.Green:
-        int endLocation = moveDistance - (7 - curLocation);
-        getSlot(curLocation).playerPieceList.remove(pp);
-        pp.location = endLocation;
-        getGreenEndSlot(endLocation).playerPieceList.add(pp);
-        movesList.remove(moveDistance);
+        endLocation = moveDistance - (7 - curLocation);
         break;
       case PieceType.Blue:
-        int endLocation = moveDistance - (20 - curLocation);
-        getSlot(curLocation).playerPieceList.remove(pp);
-        pp.location = endLocation;
-        getBlueEndSlot(endLocation).playerPieceList.add(pp);
-        movesList.remove(moveDistance);
+        endLocation = moveDistance - (20 - curLocation);
         break;
       case PieceType.Red:
-        int endLocation = moveDistance - (33 - curLocation);
-        getSlot(curLocation).playerPieceList.remove(pp);
-        pp.location = endLocation;
-        getRedEndSlot(endLocation).playerPieceList.add(pp);
-        movesList.remove(moveDistance);
+        endLocation = moveDistance - (33 - curLocation);
         break;
       case PieceType.Yellow:
-        int endLocation = moveDistance - (46 - curLocation);
-        getSlot(curLocation).playerPieceList.remove(pp);
-        pp.location = endLocation;
-        getYellowEndSlot(endLocation).playerPieceList.add(pp);
-        movesList.remove(moveDistance);
+        endLocation = moveDistance - (46 - curLocation);
         break;
     }
+    getSlot(curLocation).playerPieceList.remove(pp);
+    pp.location = endLocation;
+    getPlayerEndSlot(pp.pieceType, endLocation).playerPieceList.add(pp);
+    movesList.remove(moveDistance);
     notifyListeners();
   }
 
@@ -423,6 +360,20 @@ class GameState extends ChangeNotifier {
         break;
     }
     return false;
+  }
+
+  List<PlayerPiece> getPlayerPieceList(PieceType pt) {
+    switch (pt) {
+      case PieceType.Green:
+        return greenPlayerPieces;
+      case PieceType.Blue:
+        return bluePlayerPieces;
+      case PieceType.Red:
+        return redPlayerPieces;
+      case PieceType.Yellow:
+        return yellowPlayerPieces;
+    }
+    return null;
   }
 
   generatePlayerPieces() {
@@ -525,11 +476,16 @@ class GameState extends ChangeNotifier {
       CustomBox(getSlot(6)),
     ];
     _greenColumn2 = [
-      CustomBox(getGreenEndSlot(5), c: PlayerPiece.getColor(PieceType.Green)),
-      CustomBox(getGreenEndSlot(4), c: PlayerPiece.getColor(PieceType.Green)),
-      CustomBox(getGreenEndSlot(3), c: PlayerPiece.getColor(PieceType.Green)),
-      CustomBox(getGreenEndSlot(2), c: PlayerPiece.getColor(PieceType.Green)),
-      CustomBox(getGreenEndSlot(1), c: PlayerPiece.getColor(PieceType.Green)),
+      CustomBox(getPlayerEndSlot(PieceType.Green, 5),
+          c: PlayerPiece.getColor(PieceType.Green)),
+      CustomBox(getPlayerEndSlot(PieceType.Green, 4),
+          c: PlayerPiece.getColor(PieceType.Green)),
+      CustomBox(getPlayerEndSlot(PieceType.Green, 3),
+          c: PlayerPiece.getColor(PieceType.Green)),
+      CustomBox(getPlayerEndSlot(PieceType.Green, 2),
+          c: PlayerPiece.getColor(PieceType.Green)),
+      CustomBox(getPlayerEndSlot(PieceType.Green, 1),
+          c: PlayerPiece.getColor(PieceType.Green)),
       CustomBox(getSlot(7)),
     ];
     _greenColumn3 = [
@@ -549,11 +505,16 @@ class GameState extends ChangeNotifier {
       CustomBox(getSlot(19)),
     ];
     _blueColumn2 = [
-      CustomBox(getBlueEndSlot(5), c: PlayerPiece.getColor(PieceType.Blue)),
-      CustomBox(getBlueEndSlot(4), c: PlayerPiece.getColor(PieceType.Blue)),
-      CustomBox(getBlueEndSlot(3), c: PlayerPiece.getColor(PieceType.Blue)),
-      CustomBox(getBlueEndSlot(2), c: PlayerPiece.getColor(PieceType.Blue)),
-      CustomBox(getBlueEndSlot(1), c: PlayerPiece.getColor(PieceType.Blue)),
+      CustomBox(getPlayerEndSlot(PieceType.Blue, 5),
+          c: PlayerPiece.getColor(PieceType.Blue)),
+      CustomBox(getPlayerEndSlot(PieceType.Blue, 4),
+          c: PlayerPiece.getColor(PieceType.Blue)),
+      CustomBox(getPlayerEndSlot(PieceType.Blue, 3),
+          c: PlayerPiece.getColor(PieceType.Blue)),
+      CustomBox(getPlayerEndSlot(PieceType.Blue, 2),
+          c: PlayerPiece.getColor(PieceType.Blue)),
+      CustomBox(getPlayerEndSlot(PieceType.Blue, 1),
+          c: PlayerPiece.getColor(PieceType.Blue)),
       CustomBox(getSlot(20)),
     ];
     _blueColumn3 = [
@@ -573,11 +534,16 @@ class GameState extends ChangeNotifier {
       CustomBox(getSlot(32)),
     ];
     _redColumn2 = [
-      CustomBox(getRedEndSlot(5), c: PlayerPiece.getColor(PieceType.Red)),
-      CustomBox(getRedEndSlot(4), c: PlayerPiece.getColor(PieceType.Red)),
-      CustomBox(getRedEndSlot(3), c: PlayerPiece.getColor(PieceType.Red)),
-      CustomBox(getRedEndSlot(2), c: PlayerPiece.getColor(PieceType.Red)),
-      CustomBox(getRedEndSlot(1), c: PlayerPiece.getColor(PieceType.Red)),
+      CustomBox(getPlayerEndSlot(PieceType.Red, 5),
+          c: PlayerPiece.getColor(PieceType.Red)),
+      CustomBox(getPlayerEndSlot(PieceType.Red, 4),
+          c: PlayerPiece.getColor(PieceType.Red)),
+      CustomBox(getPlayerEndSlot(PieceType.Red, 3),
+          c: PlayerPiece.getColor(PieceType.Red)),
+      CustomBox(getPlayerEndSlot(PieceType.Red, 2),
+          c: PlayerPiece.getColor(PieceType.Red)),
+      CustomBox(getPlayerEndSlot(PieceType.Red, 1),
+          c: PlayerPiece.getColor(PieceType.Red)),
       CustomBox(getSlot(33)),
     ];
     _redColumn3 = [
@@ -597,11 +563,16 @@ class GameState extends ChangeNotifier {
       CustomBox(getSlot(45)),
     ];
     _yellowColumn2 = [
-      CustomBox(getYellowEndSlot(5), c: PlayerPiece.getColor(PieceType.Yellow)),
-      CustomBox(getYellowEndSlot(4), c: PlayerPiece.getColor(PieceType.Yellow)),
-      CustomBox(getYellowEndSlot(3), c: PlayerPiece.getColor(PieceType.Yellow)),
-      CustomBox(getYellowEndSlot(2), c: PlayerPiece.getColor(PieceType.Yellow)),
-      CustomBox(getYellowEndSlot(1), c: PlayerPiece.getColor(PieceType.Yellow)),
+      CustomBox(getPlayerEndSlot(PieceType.Yellow, 5),
+          c: PlayerPiece.getColor(PieceType.Yellow)),
+      CustomBox(getPlayerEndSlot(PieceType.Yellow, 4),
+          c: PlayerPiece.getColor(PieceType.Yellow)),
+      CustomBox(getPlayerEndSlot(PieceType.Yellow, 3),
+          c: PlayerPiece.getColor(PieceType.Yellow)),
+      CustomBox(getPlayerEndSlot(PieceType.Yellow, 2),
+          c: PlayerPiece.getColor(PieceType.Yellow)),
+      CustomBox(getPlayerEndSlot(PieceType.Yellow, 1),
+          c: PlayerPiece.getColor(PieceType.Yellow)),
       CustomBox(getSlot(46)),
     ];
     _yellowColumn3 = [

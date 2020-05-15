@@ -9,12 +9,10 @@ class PlayerPiece {
 
 //  PieceType pieceTurn;
   bool isAtEndColumn;
-  bool runComplete;
 
   PlayerPiece({this.pieceId, this.pieceType}) {
     location = 0;
     isAtEndColumn = false;
-    runComplete = false;
     Color c = getColor(this.pieceType);
     container = Container(
       height: kPieceSize,
@@ -38,6 +36,10 @@ class PlayerPiece {
 
   isAtHome() {
     return this.location == 0;
+  }
+
+  isRunComplete() {
+    return this.location == 6 && this.isAtEndColumn;
   }
 
   @override

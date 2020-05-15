@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
-var rand = math.Random(DateTime.now().millisecondsSinceEpoch);
+//var rand = math.Random(DateTime.now().millisecondsSinceEpoch);
 
 const double kEndSpacing = 30.0;
 const Color grey = Color(0xff343437);
@@ -35,5 +35,10 @@ const kStyle = TextStyle(
 const kSmallDiceSize = 40.0;
 const kNumPlayerPieces = 4;
 
-const MAX_LOC = 6;
-const MAX_DICE_NUM = 6;
+const kMaxLoc = 6;
+const kMaxDiceNum = 6;
+
+const kGreenHomeLocation = 9;
+const kBlueHomeLocation = 22;
+const kRedHomeLocation = 35;
+const kYellowHomeLocation = 48;
