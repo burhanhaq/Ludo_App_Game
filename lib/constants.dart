@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
-
-//var rand = math.Random(DateTime.now().millisecondsSinceEpoch);
 
 const double kEndSpacing = 30.0;
 const Color grey = Color(0xff343437);
@@ -45,7 +42,7 @@ const kBlueHomeLocation = 22;
 const kRedHomeLocation = 35;
 const kYellowHomeLocation = 48;
 
-// ---------------------------------------------------------------------Page Content
+// ----------------------------------------------------------------------------- Page Content
 
 const kPageContentStyle = TextStyle(
     fontSize: 22, color: Colors.black, decoration: TextDecoration.none);

@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -77,7 +75,7 @@ class _CustomContainerState extends State<CustomContainer>
     with SingleTickerProviderStateMixin {
   var sizeController;
   var sizeAnimation;
-  int animationSpeed = 800;
+  int animationSpeed = 150;
 
   @override
   void initState() {
@@ -109,7 +107,7 @@ class _CustomContainerState extends State<CustomContainer>
       sizeController.reverse();
       width *=  kPageClosedWidthMultiplier;
     }
-    if (gameState.startGame) {
+    if (gameState.curPageOption == PageOption.StartGame) {
       width = 0;
     }
     return AnimatedContainer(
@@ -128,7 +126,7 @@ class _CustomContainerState extends State<CustomContainer>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Container(
-//                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withOpacity(0.05),
                 child: widget.child,
               ),
               if (widget.pageNum != 1)

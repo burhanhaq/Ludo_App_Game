@@ -1,17 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'column_area.dart';
 import 'constants.dart';
 import 'piece_home.dart';
 import 'game_state.dart';
-import 'dice.dart';
-import 'triangle_painter.dart';
-import 'player_piece.dart';
 import 'fire_helper.dart';
-import 'game_page.dart';
 
 class PageOne extends StatelessWidget {
   @override

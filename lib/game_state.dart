@@ -8,6 +8,7 @@ import 'slot.dart';
 import 'custom_box.dart';
 import 'player_piece.dart';
 import 'fire_helper.dart';
+import 'models/user.dart';
 
 class GameState extends ChangeNotifier {
   List<Slot> slotList = List.generate(13 * 4, (index) => Slot(id: index + 1));
@@ -668,7 +669,7 @@ class GameState extends ChangeNotifier {
     ];
   }
 
-  // ------------------------------------------------------------------------------------------- HOME PAGE
+// ------------------------------------------------------------------------------------------- HOME PAGE
   int _curPage = 1;
 
   get curPage => _curPage;
@@ -694,6 +695,16 @@ class GameState extends ChangeNotifier {
 
   set startGame(bool val) {
     _startGame = val;
+    notifyListeners();
+  }
+
+// -------------------------------------------------------------------------------------- ONLINE STUFF
+  User _user;
+
+  get user => _user;
+
+  set user(User val) {
+    _user = val;
     notifyListeners();
   }
 }

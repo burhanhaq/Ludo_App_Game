@@ -1,23 +1,24 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:core';
-
-const GAMES_COLLECTION = 'games';
-const ROOMS_COLLECTION = 'rooms';
-const USERS_COLLECTION = 'users';
-
-const NAME = 'name';
-const USER_ID = 'userID';
-const GAMES = 'games';
-const WINS = 'wins';
-const ROOM_ID = 'roomID';
-const GAME_ID = 'gameID';
-const PLAYER_IDS = 'playerIDs';
-const MOVES_LIST = 'movesList';
-const LOCATION_LIST = 'locationList';
-const TURN = 'turn';
+import 'constants.dart';
 
 class Fire {
+  static const GAMES_COLLECTION = 'games';
+  static const ROOMS_COLLECTION = 'rooms';
+  static const USERS_COLLECTION = 'users';
+
+  static const NAME = 'name';
+  static const USER_ID = 'userID';
+  static const GAMES = 'games';
+  static const WINS = 'wins';
+  static const ROOM_ID = 'roomID';
+  static const GAME_ID = 'gameID';
+  static const PLAYER_IDS = 'playerIDs';
+  static const MOVES_LIST = 'movesList';
+  static const LOCATION_LIST = 'locationList';
+  static const TURN = 'turn';
+
   Fire._privateConstructor();
 
   static final Fire instance = Fire._privateConstructor();
