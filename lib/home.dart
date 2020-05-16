@@ -145,7 +145,7 @@ class Home extends StatelessWidget {
               SizedBox(height: 20),
               GestureDetector(
                 onTap: gameState.diceTap,
-                child: Dice(size: 100, c: stateColor),
+                child: Dice(size: 100, c: stateColor, num: gameState.lastMove),
               ),
 //              GestureDetector(
 //                onTap: Fire.instance.run,
