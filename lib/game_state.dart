@@ -14,8 +14,10 @@ class GameState extends ChangeNotifier {
   List<int> movesList = [];
   bool extraThrowToken = false;
   List<PieceType> pieceTurn = [];
+  List<PieceType> winnerList = [];
   int selectedDiceIndex = 0;
   int _lastMove = 1;
+  bool gameOver = false;
 
   get lastMoveOnDice => _lastMove;
 
@@ -46,18 +48,6 @@ class GameState extends ChangeNotifier {
     return null;
   }
 
-  setPieceOnSlot(PlayerPiece pp, int id) {
-    pp.location = id;
-    getSlot(id).playerPieceList.add(pp);
-    notifyListeners();
-  }
-
-  setPieceOnEndSlot(PlayerPiece pp, int id) {
-    pp.location = id;
-    pp.isAtEndColumn = true;
-    getEndSlot(pp.pieceType, id).playerPieceList.add(pp);
-    notifyListeners();
-  }
 
   setTurnsForPlayers(int playerNum) {
     switch (playerNum) {
@@ -78,6 +68,23 @@ class GameState extends ChangeNotifier {
     }
   }
 
+  setPieceOnSlot(PlayerPiece pp, int id) {
+    pp.location = id;
+    getSlot(id).playerPieceList.add(pp);
+    notifyListeners();
+  }
+
+  setPieceOnEndSlot(PlayerPiece pp, int id) {
+    pp.location = id;
+    pp.isAtEndColumn = true;
+    getEndSlot(pp.pieceType, id).playerPieceList.add(pp);
+    notifyListeners();
+  }
+
+  setPieceWon(PlayerPiece pp) {
+    pp.location = 6;
+    pp.isAtEndColumn = true;
+  }
   initialize() {
     setTurnsForPlayers(4);
 
@@ -96,27 +103,39 @@ class GameState extends ChangeNotifier {
     _setStop(43);
     _setStop(48);
 
-    setPieceOnSlot(greenPlayerPieces[0], 6);
-    setPieceOnSlot(bluePlayerPieces[0], 19);
-    setPieceOnSlot(yellowPlayerPieces[0], 45);
-    setPieceOnSlot(redPlayerPieces[0], 32);
-    setPieceOnSlot(greenPlayerPieces[1], 6);
-    setPieceOnSlot(bluePlayerPieces[1], 19);
-    setPieceOnSlot(yellowPlayerPieces[1], 45);
-    setPieceOnSlot(redPlayerPieces[1], 32);
-    setPieceOnSlot(greenPlayerPieces[2], 6);
-    setPieceOnSlot(bluePlayerPieces[2], 19);
-    setPieceOnSlot(yellowPlayerPieces[2], 45);
-    setPieceOnSlot(redPlayerPieces[2], 32);
-    setPieceOnSlot(greenPlayerPieces[3], 6);
-    setPieceOnSlot(bluePlayerPieces[3], 19);
-    setPieceOnSlot(yellowPlayerPieces[3], 45);
-    setPieceOnSlot(redPlayerPieces[3], 32);
+//    setPieceOnSlot(greenPlayerPieces[0], 7);
+//    setPieceOnSlot(bluePlayerPieces[0], 20);
+//    setPieceOnSlot(yellowPlayerPieces[0], 46);
+//    setPieceOnSlot(redPlayerPieces[0], 33);
+//    setPieceOnSlot(greenPlayerPieces[1], 7);
+//    setPieceOnSlot(bluePlayerPieces[1], 20);
+//    setPieceOnSlot(yellowPlayerPieces[1], 46);
+//    setPieceOnSlot(redPlayerPieces[1], 33);
+//    setPieceOnSlot(greenPlayerPieces[2], 7);
+//    setPieceOnSlot(bluePlayerPieces[2], 20);
+//    setPieceOnSlot(yellowPlayerPieces[2], 46);
+//    setPieceOnSlot(redPlayerPieces[2], 33);
+//    setPieceOnSlot(greenPlayerPieces[3], 7);
+//    setPieceOnSlot(bluePlayerPieces[3], 20);
+//    setPieceOnSlot(yellowPlayerPieces[3], 46);
+//    setPieceOnSlot(redPlayerPieces[3], 33);
 
-//    setPieceOnEndSlot(greenPlayerPieces[1], 2);
-//    setPieceOnEndSlot(bluePlayerPieces[2], 5);
-//    setPieceOnEndSlot(redPlayerPieces[2], 5);
-//    setPieceOnEndSlot(yellowPlayerPieces[2], 5);
+    setPieceOnEndSlot(greenPlayerPieces[0], 4);
+    setPieceOnEndSlot(bluePlayerPieces[0], 4);
+    setPieceOnEndSlot(yellowPlayerPieces[0], 4);
+    setPieceOnEndSlot(redPlayerPieces[0], 4);
+    setPieceWon(greenPlayerPieces[1]);
+    setPieceWon(greenPlayerPieces[2]);
+    setPieceWon(greenPlayerPieces[3]);
+    setPieceWon(bluePlayerPieces[1]);
+    setPieceWon(bluePlayerPieces[2]);
+    setPieceWon(bluePlayerPieces[3]);
+    setPieceWon(redPlayerPieces[1]);
+    setPieceWon(redPlayerPieces[2]);
+    setPieceWon(redPlayerPieces[3]);
+    setPieceWon(yellowPlayerPieces[1]);
+    setPieceWon(yellowPlayerPieces[2]);
+    setPieceWon(yellowPlayerPieces[3]);
   }
 
   PieceType getTurn() {
@@ -124,6 +143,7 @@ class GameState extends ChangeNotifier {
   }
 
   pieceTap(PlayerPiece pp) {
+    if (gameOver) return;
     print('Tapped Slot');
     print('index: $selectedDiceIndex');
     if (pp == null) return;
@@ -146,6 +166,7 @@ class GameState extends ChangeNotifier {
   }
 
   canAnyPieceMove(PieceType pt) {
+    if (gameOver) return false;
     if (extraThrowToken) return true;
     if (movesList.isEmpty) return false;
     List<PlayerPiece> list;
@@ -164,7 +185,7 @@ class GameState extends ChangeNotifier {
         break;
     }
 
-    if (didPlayerWin(pt)) return false;
+//    if (didPlayerWin(pt)) return false; // todo needed?
 
     if (movesList.contains(6) && list.any((element) => element.isAtHome())) {
       // can move 6 and some piece at home
@@ -187,6 +208,7 @@ class GameState extends ChangeNotifier {
   }
 
   void diceTap() {
+    if (gameOver) return;
     PieceType turn = getTurn();
     bool canThrow = canThrowDice();
     if (!canThrow) return;
@@ -341,7 +363,11 @@ class GameState extends ChangeNotifier {
   }
 
   playerFinishedRun() {
+    winnerList.add(getTurn());
     pieceTurn.remove(getTurn());
+    if (pieceTurn.length == 1) {
+      gameOver = true;
+    }
   }
 
   movePieceInEndCol(PlayerPiece pp, int moveDistance) {
@@ -355,15 +381,15 @@ class GameState extends ChangeNotifier {
       extraThrowToken =
           true; // todo add this to movePieceToEndCol() if piece wins
       pp.isAtEndColumn = true;
-      if (didPlayerWin(pp.pieceType)) {
-        playerFinishedRun();
-      }
     }
     // newLocation <= MAX_LOC
     pp.location = newLocation;
     getEndSlot(pp.pieceType, curLocation).playerPieceList.remove(pp);
     getEndSlot(pp.pieceType, newLocation).playerPieceList.add(pp);
     movesList.remove(moveDistance);
+    if (didPlayerWin(pp.pieceType)) {
+      playerFinishedRun();
+    }
     notifyListeners();
   }
 
