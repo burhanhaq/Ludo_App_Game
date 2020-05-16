@@ -23,8 +23,7 @@ class _PieceHomeState extends State<PieceHome> {
   @override
   Widget build(BuildContext context) {
     var gameState = Provider.of<GameState>(context);
-    List<PlayerPiece> piecesList = [];
-    piecesList = gameState.getPlayerPieceList(widget.pt);
+    List<PlayerPiece> piecesList = gameState.getPlayerPieceList(widget.pt);
     List<Widget> widgetPieceList = List.generate(
       piecesList.length,
       (index) => GestureDetector(
@@ -38,36 +37,55 @@ class _PieceHomeState extends State<PieceHome> {
           ),
           child: Container(
             margin: const EdgeInsets.all(7.0),
-            child:
-            piecesList[index].isAtHome() ? piecesList[index].container : null,
+            child: piecesList[index].isAtHome()
+                ? piecesList[index].container
+                : null,
           ),
         ),
       ),
     );
+    Icon iconWidget = Icon(Icons.signal_cellular_off,
+        color: gameState.getTurn() == widget.pt ? Colors.black54 : trans,
+        size: kHomeWidth / 5);
     return Container(
       height: kHomeWidth,
       width: kHomeWidth,
       decoration: BoxDecoration(
-        color: gameState.getTurn() == widget.pt ? trans : widget.c,
-        boxShadow: [
-          BoxShadow(
-            color: white,
-          ),
-          BoxShadow(
-            color: widget.c,
-            blurRadius: 15,
-            spreadRadius: -10,
-          ),
-        ],
+        color: widget.c,
         borderRadius: BorderRadius.all(Radius.circular(5.0)),
 //        border: Border.all(), // todo all cool border color
       ),
-      child: GridView.count(
-        crossAxisCount: 2,
-        crossAxisSpacing: 10.0,
-        mainAxisSpacing: 10.0,
-        padding: EdgeInsets.all(30),
-        children: widgetPieceList,
+      child: Stack(
+        alignment: Alignment.center,
+        children: <Widget>[
+          GridView.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: 10.0,
+            mainAxisSpacing: 10.0,
+            padding: EdgeInsets.all(30),
+            children: widgetPieceList,
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            child: RotatedBox(quarterTurns: 2, child: iconWidget),
+          ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: RotatedBox(quarterTurns: 3, child: iconWidget),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            child: RotatedBox(quarterTurns: 1, child: iconWidget),
+          ),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: RotatedBox(quarterTurns: 0, child: iconWidget),
+          ),
+        ],
       ),
     );
   }

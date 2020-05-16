@@ -26,8 +26,12 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  _setStop(int id) {
-    slotList[id - 1].isStop = true;
+  _setHomeStop(int id) {
+    slotList[id - 1].isHomeStop = true;
+  }
+
+  _setOtherStop(int id) {
+    slotList[id - 1].isOtherStop = true;
   }
 
   Slot getSlot(int id) {
@@ -91,17 +95,17 @@ class GameState extends ChangeNotifier {
     generatePlayerPieces();
     initColumn();
     // 1 - 13 green
-    _setStop(4);
-    _setStop(9);
+    _setOtherStop(4);
+    _setHomeStop(9);
     // 14 - 26 blue
-    _setStop(17);
-    _setStop(22);
+    _setOtherStop(17);
+    _setHomeStop(22);
     // 27 - 39 red
-    _setStop(30);
-    _setStop(35);
+    _setOtherStop(30);
+    _setHomeStop(35);
     // 40 - 52 yellow
-    _setStop(43);
-    _setStop(48);
+    _setOtherStop(43);
+    _setHomeStop(48);
 
 //    setPieceOnSlot(greenPlayerPieces[0], 7);
 //    setPieceOnSlot(bluePlayerPieces[0], 20);
@@ -259,7 +263,7 @@ class GameState extends ChangeNotifier {
   }
 
   bool canDelete(int slotId) {
-    if (getSlot(slotId).isStop) return false;
+    if (getSlot(slotId).isStop()) return false;
     var pieceList = getSlot(slotId).playerPieceList;
     if (pieceList.isEmpty) return false;
     PlayerPiece topPiece = pieceList.last;

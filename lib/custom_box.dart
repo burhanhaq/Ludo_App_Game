@@ -21,10 +21,10 @@ class _CustomBoxState extends State<CustomBox> {
   Widget build(BuildContext context) {
     GameState gameState = Provider.of<GameState>(context);
     var text = widget.slot.id.toString();
-    if (widget.slot.isStop) {
+    if (widget.slot.isHomeStop) {
 //      text = 'S';
     }
-//    text = '';
+    text = '';
     Widget textWidget = Text(
       text,
       style: TextStyle(
@@ -45,6 +45,26 @@ class _CustomBoxState extends State<CustomBox> {
       );
     });
     List<Widget> stackList = [textWidget] + playerPieceListWidget;
+    if (widget.slot.isHomeStop) {
+      stackList.insert(
+          0,
+          Icon(
+            Icons.merge_type,
+            color: Colors.black45,
+            size: kBoxWidth,
+          ));
+    } else if (widget.slot.isOtherStop) {
+      stackList.insert(
+          0,
+          RotatedBox(
+            quarterTurns: 2,
+            child: Icon(
+              Icons.call_split,
+              color: Colors.black45,
+              size: kBoxWidth,
+            ),
+          ));
+    }
     PieceType turn = gameState.getTurn();
     bool containsPiece =
         widget.slot.playerPieceList.any((element) => element.pieceType == turn);
