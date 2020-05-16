@@ -667,4 +667,33 @@ class GameState extends ChangeNotifier {
       CustomBox(getSlot(47)),
     ];
   }
+
+  // ------------------------------------------------------------------------------------------- HOME PAGE
+  int _curPage = 1;
+
+  get curPage => _curPage;
+
+  PageOption _curPageOption;
+
+  get curPageOption => _curPageOption;
+
+  pageBack() {
+    if (_curPage > 1) --_curPage;
+    notifyListeners();
+  }
+
+  pageForward(PageOption po) {
+    if (_curPage < 4) ++_curPage;
+    _curPageOption = po;
+    notifyListeners();
+  }
+
+  bool _startGame = false;
+
+  get startGame => _startGame;
+
+  set startGame(bool val) {
+    _startGame = val;
+    notifyListeners();
+  }
 }

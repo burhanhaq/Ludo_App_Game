@@ -44,3 +44,21 @@ const kGreenHomeLocation = 9;
 const kBlueHomeLocation = 22;
 const kRedHomeLocation = 35;
 const kYellowHomeLocation = 48;
+
+// ---------------------------------------------------------------------Page Content
+
+const kPageContentStyle = TextStyle(
+    fontSize: 22, color: Colors.black, decoration: TextDecoration.none);
+const kHeightMultiplier = 0.8;
+
+enum PageOption {
+  None,
+  CreateUsername,
+  SignIn,
+  CreateRoom,
+  JoinRoom,
+  StartGame
+}
+
+const kPageOpenWidthMultiplier = 0.85;
+const kPageClosedWidthMultiplier = 0.05;
