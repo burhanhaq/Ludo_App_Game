@@ -24,35 +24,11 @@ class _PieceHomeState extends State<PieceHome> {
   Widget build(BuildContext context) {
     var gameState = Provider.of<GameState>(context);
     List<PlayerPiece> piecesList = [];
-    switch (widget.pt) {
-      case PieceType.Green:
-        gameState.greenPlayerPieces.forEach((element) {
-          if (element.location == 0) piecesList.add(element);
-        });
-        break;
-      case PieceType.Blue:
-        gameState.bluePlayerPieces.forEach((element) {
-          if (element.location == 0) piecesList.add(element);
-        });
-        break;
-      case PieceType.Red:
-        gameState.redPlayerPieces.forEach((element) {
-          if (element.location == 0) piecesList.add(element);
-        });
-        break;
-      case PieceType.Yellow:
-        gameState.yellowPlayerPieces.forEach((element) {
-          if (element.location == 0) piecesList.add(element);
-        });
-        break;
-    }
-    while (piecesList.length < 4) {
-      piecesList.add(null);
-    }
+    piecesList = gameState.getPlayerPieceList(widget.pt);
     List<Widget> widgetPieceList = List.generate(
       piecesList.length,
       (index) => GestureDetector(
-        onTap: () => gameState.pieceTap(piecesList[0]),
+        onTap: () => gameState.pieceTap(piecesList[index]),
         child: Container(
           height: kPieceSize - 5,
           width: kPieceSize - 5,
@@ -62,7 +38,8 @@ class _PieceHomeState extends State<PieceHome> {
           ),
           child: Container(
             margin: const EdgeInsets.all(7.0),
-            child: piecesList[index] == null ? null : piecesList[index].container,
+            child:
+            piecesList[index].isAtHome() ? piecesList[index].container : null,
           ),
         ),
       ),
@@ -89,7 +66,6 @@ class _PieceHomeState extends State<PieceHome> {
         crossAxisCount: 2,
         crossAxisSpacing: 10.0,
         mainAxisSpacing: 10.0,
-//        childAspectRatio: 2,
         padding: EdgeInsets.all(30),
         children: widgetPieceList,
       ),

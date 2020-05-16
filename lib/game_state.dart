@@ -48,7 +48,6 @@ class GameState extends ChangeNotifier {
     return null;
   }
 
-
   setTurnsForPlayers(int playerNum) {
     switch (playerNum) {
       case 2:
@@ -85,6 +84,7 @@ class GameState extends ChangeNotifier {
     pp.location = 6;
     pp.isAtEndColumn = true;
   }
+
   initialize() {
     setTurnsForPlayers(4);
 
@@ -120,22 +120,22 @@ class GameState extends ChangeNotifier {
 //    setPieceOnSlot(yellowPlayerPieces[3], 46);
 //    setPieceOnSlot(redPlayerPieces[3], 33);
 
-    setPieceOnEndSlot(greenPlayerPieces[0], 4);
-    setPieceOnEndSlot(bluePlayerPieces[0], 4);
-    setPieceOnEndSlot(yellowPlayerPieces[0], 4);
-    setPieceOnEndSlot(redPlayerPieces[0], 4);
-    setPieceWon(greenPlayerPieces[1]);
-    setPieceWon(greenPlayerPieces[2]);
-    setPieceWon(greenPlayerPieces[3]);
-    setPieceWon(bluePlayerPieces[1]);
-    setPieceWon(bluePlayerPieces[2]);
-    setPieceWon(bluePlayerPieces[3]);
-    setPieceWon(redPlayerPieces[1]);
-    setPieceWon(redPlayerPieces[2]);
-    setPieceWon(redPlayerPieces[3]);
-    setPieceWon(yellowPlayerPieces[1]);
-    setPieceWon(yellowPlayerPieces[2]);
-    setPieceWon(yellowPlayerPieces[3]);
+//    setPieceOnEndSlot(greenPlayerPieces[0], 4);
+//    setPieceOnEndSlot(bluePlayerPieces[0], 4);
+//    setPieceOnEndSlot(yellowPlayerPieces[0], 4);
+//    setPieceOnEndSlot(redPlayerPieces[0], 4);
+//    setPieceWon(greenPlayerPieces[1]);
+//    setPieceWon(greenPlayerPieces[2]);
+//    setPieceWon(greenPlayerPieces[3]);
+//    setPieceWon(bluePlayerPieces[1]);
+//    setPieceWon(bluePlayerPieces[2]);
+//    setPieceWon(bluePlayerPieces[3]);
+//    setPieceWon(redPlayerPieces[1]);
+//    setPieceWon(redPlayerPieces[2]);
+//    setPieceWon(redPlayerPieces[3]);
+//    setPieceWon(yellowPlayerPieces[1]);
+//    setPieceWon(yellowPlayerPieces[2]);
+//    setPieceWon(yellowPlayerPieces[3]);
   }
 
   PieceType getTurn() {
@@ -152,7 +152,7 @@ class GameState extends ChangeNotifier {
       if (movesList.length > 0) {
         if (pp.location == 0) {
           if (movesList.contains(6)) {
-            addPiece(pp.pieceType);
+            addPiece(pp);
           }
         } else {
           movePiece(pp, movesList[selectedDiceIndex]);
@@ -306,14 +306,14 @@ class GameState extends ChangeNotifier {
     }
   }
 
-  addPiece(PieceType pt) {
-    PlayerPiece pp;
-    int homePosition = getHomePosition(pt);
+  addPiece(PlayerPiece pp) {
+//    PlayerPiece pp;
+    int homePosition = getHomePosition(pp.pieceType);
 
-    Iterable<PlayerPiece> availablePieces = getPlayerPieceList(pt)
-        .where((element) => element.location == kPieceHomeLocation);
-    if (availablePieces.length > 0) {
-      pp = availablePieces.first;
+//    Iterable<PlayerPiece> availablePieces = getPlayerPieceList(pt)
+//        .where((element) => element.location == kPieceHomeLocation);
+    if (pp.isAtHome()) {
+//      pp = availablePieces.first;
       pp.location = homePosition;
       getSlot(homePosition).playerPieceList.add(pp);
       movesList.remove(6);
@@ -441,7 +441,7 @@ class GameState extends ChangeNotifier {
     return false;
   }
 
-  List<PlayerPiece> getPlayerPieceList(PieceType pt) {
+  getPlayerPieceList(PieceType pt) {
     switch (pt) {
       case PieceType.Green:
         return greenPlayerPieces;
@@ -452,7 +452,6 @@ class GameState extends ChangeNotifier {
       case PieceType.Yellow:
         return yellowPlayerPieces;
     }
-    return null;
   }
 
   generatePlayerPieces() {
