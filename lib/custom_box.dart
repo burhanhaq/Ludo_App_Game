@@ -21,8 +21,9 @@ class _CustomBoxState extends State<CustomBox> {
   @override
   Widget build(BuildContext context) {
     GameState gameState = Provider.of<GameState>(context);
+    List<PlayerPiece> piecesList = widget.slot.playerPieceList;
     var text = widget.slot.id.toString();
-    if (!kDebugMode) {
+    if (!kDebugMode || widget.slot.isStop()) {
       text = '';
     }
     Widget textWidget = Text(
@@ -33,17 +34,22 @@ class _CustomBoxState extends State<CustomBox> {
         decoration: TextDecoration.none,
       ),
     );
-    var offsetValue = -3.0;
-    List<Widget> playerPieceListWidget =
-        List.generate(widget.slot.playerPieceList.length, (index) {
-      offsetValue += 4.0; // todo lol this
-      return Positioned(
-        top: offsetValue,
-        child: IgnorePointer(
-          child: widget.slot.playerPieceList[index].container,
-        ),
-      );
-    });
+    List<Widget> playerPieceListWidget = [];
+    if (piecesList.length == 1) {
+      playerPieceListWidget.add(IgnorePointer(child: piecesList[0].container));
+    } else {
+      var offsetValue = -4.0;
+      playerPieceListWidget = List.generate(piecesList.length, (index) {
+        offsetValue += 4.0; // todo lol this
+        return Positioned(
+          top: offsetValue,
+          child: IgnorePointer(
+            child: piecesList[index].container,
+          ),
+        );
+      });
+    }
+
     List<Widget> stackList = [textWidget] + playerPieceListWidget;
     if (widget.slot.isHomeStop) {
       stackList.insert(
@@ -66,12 +72,10 @@ class _CustomBoxState extends State<CustomBox> {
           ));
     }
     PieceType turn = gameState.getTurn();
-    bool containsPiece =
-        widget.slot.playerPieceList.any((element) => element.pieceType == turn);
+    bool containsPiece = piecesList.any((element) => element.pieceType == turn);
     PlayerPiece pp;
     if (containsPiece) {
-      pp = widget.slot.playerPieceList
-          .firstWhere((element) => element.pieceType == turn);
+      pp = piecesList.firstWhere((element) => element.pieceType == turn);
     }
     return GestureDetector(
       onTap: () => gameState.pieceTap(pp),

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'constants.dart';
 
@@ -24,7 +25,7 @@ class PlayerPiece {
       ),
       child: Center(
         child: Text(
-          this.pieceId.toString(),
+          kDebugMode ? this.pieceId.toString() : '',
           textAlign: TextAlign.center,
           style: kStyle.copyWith(
             fontSize: 8,
