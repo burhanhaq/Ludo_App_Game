@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -21,10 +22,9 @@ class _CustomBoxState extends State<CustomBox> {
   Widget build(BuildContext context) {
     GameState gameState = Provider.of<GameState>(context);
     var text = widget.slot.id.toString();
-    if (widget.slot.isHomeStop) {
-//      text = 'S';
+    if (!kDebugMode) {
+      text = '';
     }
-    text = '';
     Widget textWidget = Text(
       text,
       style: TextStyle(

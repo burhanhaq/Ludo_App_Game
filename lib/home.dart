@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -69,6 +70,32 @@ class _HomeState extends State<Home> {
     );
   }
 
+  getRowChild(GameState gameState, PieceType pt) {
+    List<PlayerPiece> completedPiecesList = gameState
+        .getPlayerPieceList(pt)
+        .where((element) => element.isRunComplete()).toList();
+
+    int rowLength = completedPiecesList.length;
+    var topPiece = Container();
+    if (completedPiecesList.length == 4) {
+      --rowLength;
+      topPiece = Container(child: completedPiecesList.last.container);
+    }
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        topPiece,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            rowLength,
+            (index) => Container(child: completedPiecesList[index].container),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var gameState = Provider.of<GameState>(context);
@@ -116,33 +143,53 @@ class _HomeState extends State<Home> {
                         child: ColumnArea(piece: PieceType.Blue),
                       ),
                     ),
-                    CustomPaint(
-                      size: Size(middleAreaSize, middleAreaSize),
-                      painter: TrianglePainter(
-                          c: PlayerPiece.getColor(PieceType.Green)),
-                    ),
-                    RotatedBox(
-                      quarterTurns: 1,
+                    SizedBox(
+                      height: middleAreaSize,
+                      width: middleAreaSize,
                       child: CustomPaint(
                         size: Size(middleAreaSize, middleAreaSize),
                         painter: TrianglePainter(
-                            c: PlayerPiece.getColor(PieceType.Blue)),
+                            c: PlayerPiece.getColor(PieceType.Green)),
+                        child: getRowChild(gameState, PieceType.Green),
+                      ),
+                    ),
+                    RotatedBox(
+                      quarterTurns: 1,
+                      child: SizedBox(
+                        height: middleAreaSize,
+                        width: middleAreaSize,
+                        child: CustomPaint(
+                          size: Size(middleAreaSize, middleAreaSize),
+                          painter: TrianglePainter(
+                              c: PlayerPiece.getColor(PieceType.Blue)),
+                          child: getRowChild(gameState, PieceType.Blue),
+                        ),
                       ),
                     ),
                     RotatedBox(
                       quarterTurns: 2,
-                      child: CustomPaint(
-                        size: Size(middleAreaSize, middleAreaSize),
-                        painter: TrianglePainter(
-                            c: PlayerPiece.getColor(PieceType.Red)),
+                      child: SizedBox(
+                        height: middleAreaSize,
+                        width: middleAreaSize,
+                        child: CustomPaint(
+                          size: Size(middleAreaSize, middleAreaSize),
+                          painter: TrianglePainter(
+                              c: PlayerPiece.getColor(PieceType.Red)),
+                          child: getRowChild(gameState, PieceType.Red),
+                        ),
                       ),
                     ),
                     RotatedBox(
                       quarterTurns: 3,
-                      child: CustomPaint(
-                        size: Size(middleAreaSize, middleAreaSize),
-                        painter: TrianglePainter(
-                            c: PlayerPiece.getColor(PieceType.Yellow)),
+                      child: SizedBox(
+                        height: middleAreaSize,
+                        width: middleAreaSize,
+                        child: CustomPaint(
+                          size: Size(middleAreaSize, middleAreaSize),
+                          painter: TrianglePainter(
+                              c: PlayerPiece.getColor(PieceType.Yellow)),
+                          child: getRowChild(gameState, PieceType.Yellow),
+                        ),
                       ),
                     ),
                     Positioned(

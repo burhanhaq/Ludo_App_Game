@@ -445,7 +445,7 @@ class GameState extends ChangeNotifier {
     return false;
   }
 
-  getPlayerPieceList(PieceType pt) {
+  List<PlayerPiece> getPlayerPieceList(PieceType pt) {
     switch (pt) {
       case PieceType.Green:
         return greenPlayerPieces;
@@ -456,6 +456,7 @@ class GameState extends ChangeNotifier {
       case PieceType.Yellow:
         return yellowPlayerPieces;
     }
+    return null;
   }
 
   generatePlayerPieces() {
