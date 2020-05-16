@@ -33,10 +33,10 @@ class _CustomBoxState extends State<CustomBox> {
         decoration: TextDecoration.none,
       ),
     );
-    var offsetValue = 0.0;
+    var offsetValue = -3.0;
     List<Widget> playerPieceListWidget =
         List.generate(widget.slot.playerPieceList.length, (index) {
-      offsetValue += 4.0;
+      offsetValue += 4.0; // todo lol this
       return Positioned(
         top: offsetValue,
         child: IgnorePointer(

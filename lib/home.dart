@@ -11,7 +11,12 @@ import 'triangle_painter.dart';
 import 'player_piece.dart';
 import 'fire_helper.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
+  @override
+  _HomeState createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
   final middleAreaSize = (kBoxWidth + kBoxBorderWidth * 2) * 3;
 
   void listenToList() {
@@ -23,18 +28,53 @@ class Home extends StatelessWidget {
     });
   }
 
+  List<Color> selectedDiceList;
+  List<Widget> diceMovesList;
+
+  generateSelectedDiceList(GameState gameState) {
+    selectedDiceList = List.generate(gameState.movesList.length, (i) {
+      if (i == gameState.selectedDiceIndex) return white;
+      return trans;
+    });
+  }
+
+  generateDiceMovesList(GameState gameState, Color c) {
+    if (gameState.selectedDiceIndex > gameState.movesList.length - 1) {
+      gameState.selectedDiceIndex = 0;
+    }
+    diceMovesList = List.generate(
+      gameState.movesList.length,
+      (index) => Stack(
+        alignment: Alignment.center,
+        children: <Widget>[
+          Icon(
+            Icons.crop_free,
+            color: selectedDiceList[index],
+            size: kSmallDiceSize + kSelectedIconSize,
+          ),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                gameState.selectedDiceIndex = index;
+              });
+            },
+            child: Dice(
+              size: kSmallDiceSize,
+              c: c,
+              num: gameState.movesList[index],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var gameState = Provider.of<GameState>(context);
     Color stateColor = PlayerPiece.getColor(gameState.getTurn());
-    List<Widget> diceMovesList = List.generate(
-      gameState.movesList.length,
-      (index) => Dice(
-        size: kSmallDiceSize,
-        c: stateColor,
-        num: gameState.movesList[index],
-      ),
-    );
+    generateSelectedDiceList(gameState);
+    generateDiceMovesList(gameState, stateColor);
     return SafeArea(
       child: Container(
         color: grey,
@@ -132,9 +172,9 @@ class Home extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 10),
               SizedBox(
-                height: kSmallDiceSize,
+                height: kSmallDiceSize + kSelectedIconSize,
                 width: MediaQuery.of(context).size.width,
                 child: ListView(
                   physics: BouncingScrollPhysics(),
@@ -142,10 +182,11 @@ class Home extends StatelessWidget {
                   children: diceMovesList,
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 10),
               GestureDetector(
                 onTap: gameState.diceTap,
-                child: Dice(size: 100, c: stateColor, num: gameState.lastMove),
+                child: Dice(
+                    size: 100, c: stateColor, num: gameState.lastMoveOnDice),
               ),
 //              GestureDetector(
 //                onTap: Fire.instance.run,

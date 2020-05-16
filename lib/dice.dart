@@ -32,7 +32,7 @@ class _DiceState extends State<Dice> {
     return Container(
       height: widget.size,
       width: widget.size,
-      margin: const EdgeInsets.symmetric(horizontal: 5.0),
+//      margin: const EdgeInsets.symmetric(horizontal: 5.0),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.all(Radius.circular(widget.size / 7)),

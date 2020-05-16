@@ -34,9 +34,11 @@ const kStyle = TextStyle(
 
 const kSmallDiceSize = 40.0;
 const kNumPlayerPieces = 4;
+const kSelectedIconSize = 20.0;
 
 const kMaxLoc = 6;
 const kMaxDiceNum = 6;
+const kSix = 6;
 
 const kGreenHomeLocation = 9;
 const kBlueHomeLocation = 22;

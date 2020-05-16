@@ -14,11 +14,12 @@ class GameState extends ChangeNotifier {
   List<int> movesList = [];
   bool extraThrowToken = false;
   List<PieceType> pieceTurn = [];
+  int selectedDiceIndex = 0;
   int _lastMove = 1;
 
-  get lastMove => _lastMove;
+  get lastMoveOnDice => _lastMove;
 
-  set lastMove(int val) {
+  set lastMoveOnDice(int val) {
     _lastMove = val;
     notifyListeners();
   }
@@ -112,7 +113,6 @@ class GameState extends ChangeNotifier {
     setPieceOnSlot(yellowPlayerPieces[3], 45);
     setPieceOnSlot(redPlayerPieces[3], 32);
 
-//    setPieceOnSlot(yellowPlayerPieces[0], 45);
 //    setPieceOnEndSlot(greenPlayerPieces[1], 2);
 //    setPieceOnEndSlot(bluePlayerPieces[2], 5);
 //    setPieceOnEndSlot(redPlayerPieces[2], 5);
@@ -125,6 +125,7 @@ class GameState extends ChangeNotifier {
 
   pieceTap(PlayerPiece pp) {
     print('Tapped Slot');
+    print('index: $selectedDiceIndex');
     if (pp == null) return;
     if (canThrowDice()) return;
     if (pp.pieceType == getTurn()) {
@@ -134,7 +135,7 @@ class GameState extends ChangeNotifier {
             addPiece(pp.pieceType);
           }
         } else {
-          movePiece(pp, movesList[0]);
+          movePiece(pp, movesList[selectedDiceIndex]);
         }
       } else {
         print('No moves available. Tap Dice for moves');
@@ -174,8 +175,11 @@ class GameState extends ChangeNotifier {
             !element.isAtHome() && // some piece not at home and
             !element.isRunComplete() && // some piece run not complete and
             (element.isAtEndColumn && // (some piece at end column and
-                movesList.any((move) =>
-                    move <= kMaxLoc - element.location) || // any move <= kMaxLoc - location) or
+                    movesList.any((move) =>
+                        move <=
+                        kMaxLoc -
+                            element
+                                .location) || // any move <= kMaxLoc - location) or
                 !element.isAtEndColumn) // some piece not at end column
         );
 
@@ -185,14 +189,13 @@ class GameState extends ChangeNotifier {
   void diceTap() {
     PieceType turn = getTurn();
     bool canThrow = canThrowDice();
-    extraThrowToken = false;
     if (!canThrow) return;
+    extraThrowToken = false;
     int diceNum = throwDice();
     movesList.add(diceNum);
     canThrow = canThrowDice();
     bool anyPieceCanMove = canAnyPieceMove(turn);
     if (!canThrow && !anyPieceCanMove) {
-      // && !movesList.contains(6)
       print('clearing: $movesList');
       movesList.clear();
     }
@@ -209,18 +212,23 @@ class GameState extends ChangeNotifier {
     if (movesList.last != 6) return false;
     int len = movesList.length;
     if (len >= 3) {
-      if (movesList[len - 1] == 6 &&
-          movesList[len - 2] == 6 &&
-          movesList[len - 3] == 6) {
-        movesList.removeLast();
-        movesList.removeLast();
-        movesList.removeLast();
-        notifyListeners();
-        return false;
+      if (lastMoveOnDice == 6) {
+        if (movesList[len - 1] == 6 && // first one is redundant
+            movesList[len - 2] == 6 &&
+            movesList[len - 3] == 6) {
+          movesList.removeLast();
+          movesList.removeLast();
+          movesList.removeLast();
+          notifyListeners();
+          return false;
+        }
       }
     }
+    if (lastMoveOnDice == 6) {
+      return true;
+    }
     notifyListeners();
-    return true;
+    return false;
   }
 
   changeTurn() {
@@ -263,22 +271,17 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  int getHomePosition(PieceType pt) {
+  getHomePosition(PieceType pt) {
     switch (pt) {
       case PieceType.Green: // 9
         return kGreenHomeLocation;
-        break;
       case PieceType.Blue: // 22
         return kBlueHomeLocation;
-        break;
       case PieceType.Red: // 35
         return kRedHomeLocation;
-        break;
       case PieceType.Yellow: // 48
         return kYellowHomeLocation;
-        break;
     }
-    return -1;
   }
 
   addPiece(PieceType pt) {
@@ -313,6 +316,7 @@ class GameState extends ChangeNotifier {
       getSlot(curLocation).playerPieceList.remove(pp);
       getSlot(newLocation).playerPieceList.add(pp);
       movesList.remove(moveDistance);
+      selectedDiceIndex = 0;
       if (canDelete(pp.location)) {
         deleteBottomPieces(pp.location);
       }
@@ -327,7 +331,7 @@ class GameState extends ChangeNotifier {
 
   int throwDice() {
     int num = math.Random().nextInt(kMaxDiceNum) + 1;
-    lastMove = num;
+    lastMoveOnDice = num;
     print('threw $num');
     return num;
   }
