@@ -54,6 +54,7 @@ enum PageOption {
   SignIn,
   CreateRoom,
   JoinRoom,
+  InsideRoom,
   StartGame
 }
 

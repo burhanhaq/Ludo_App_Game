@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -10,7 +11,10 @@ import 'triangle_painter.dart';
 import 'player_piece.dart';
 import 'fire_helper.dart';
 import 'game_page.dart';
-import 'page_content.dart';
+import 'pages/page_one.dart';
+import 'pages/page_two.dart';
+import 'pages/page_three.dart';
+import 'pages/page_four.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -21,6 +25,21 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     GameState gameState = Provider.of<GameState>(context);
+    Color backColor = grey;
+    switch (gameState.curPage) {
+      case 1:
+        backColor = PlayerPiece.getColor(PieceType.Blue);
+        break;
+      case 2:
+        backColor = PlayerPiece.getColor(PieceType.Red);
+        break;
+      case 3:
+        backColor = PlayerPiece.getColor(PieceType.Green);
+        break;
+      case 4:
+        backColor = PlayerPiece.getColor(PieceType.Yellow);
+        break;
+    }
     return SafeArea(
       child: Stack(
         alignment: Alignment.center,
@@ -29,29 +48,32 @@ class _HomeState extends State<Home> {
           GamePage(),
           Opacity(
             opacity: 0.98,
-            child: Row(
-              children: <Widget>[
-                CustomContainer(
-                  c: PlayerPiece.getColor(PieceType.Blue),
-                  child: PageOne(),
-                  pageNum: 1,
-                ),
-                CustomContainer(
-                  c: PlayerPiece.getColor(PieceType.Red),
-                  child: PageTwo(),
-                  pageNum: 2,
-                ),
-                CustomContainer(
-                  c: PlayerPiece.getColor(PieceType.Green),
-                  child: PageThree(),
-                  pageNum: 3,
-                ),
-                CustomContainer(
-                  c: PlayerPiece.getColor(PieceType.Yellow),
-                  child: PageFour(),
-                  pageNum: 4,
-                ),
-              ],
+            child: Container(
+              color:  gameState.curPageOption == PageOption.StartGame ? trans : backColor,
+              child: Row(
+                children: <Widget>[
+                  PageContainer(
+                    c: PlayerPiece.getColor(PieceType.Blue),
+                    child: PageOne(),
+                    pageNum: 1,
+                  ),
+                  PageContainer(
+                    c: PlayerPiece.getColor(PieceType.Red),
+                    child: PageTwo(),
+                    pageNum: 2,
+                  ),
+                  PageContainer(
+                    c: PlayerPiece.getColor(PieceType.Green),
+                    child: PageThree(),
+                    pageNum: 3,
+                  ),
+                  PageContainer(
+                    c: PlayerPiece.getColor(PieceType.Yellow),
+                    child: PageFour(),
+                    pageNum: 4,
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -60,18 +82,18 @@ class _HomeState extends State<Home> {
   }
 }
 
-class CustomContainer extends StatefulWidget {
+class PageContainer extends StatefulWidget {
   final Color c;
   final Widget child;
   int pageNum;
 
-  CustomContainer({this.c = white, this.child, @required this.pageNum});
+  PageContainer({this.c = white, this.child, @required this.pageNum});
 
   @override
-  _CustomContainerState createState() => _CustomContainerState();
+  _PageContainerState createState() => _PageContainerState();
 }
 
-class _CustomContainerState extends State<CustomContainer>
+class _PageContainerState extends State<PageContainer>
     with SingleTickerProviderStateMixin {
   var sizeController;
   var sizeAnimation;
@@ -101,11 +123,11 @@ class _CustomContainerState extends State<CustomContainer>
     bool selected = gameState.curPage == widget.pageNum;
 
     if (selected) {
-      sizeController.forward(from: 0.0);
+      sizeController.forward();
       width *= kPageOpenWidthMultiplier;
     } else {
       sizeController.reverse();
-      width *=  kPageClosedWidthMultiplier;
+      width *= kPageClosedWidthMultiplier;
     }
     if (gameState.curPageOption == PageOption.StartGame) {
       width = 0;
@@ -114,7 +136,8 @@ class _CustomContainerState extends State<CustomContainer>
       duration: Duration(milliseconds: animationSpeed),
       width: width,
       height: height,
-      color: widget.c,
+      decoration: BoxDecoration(
+          color: widget.c, borderRadius: BorderRadius.all(Radius.circular(30))),
       child: Offstage(
         offstage: !selected,
         child: SizeTransition(

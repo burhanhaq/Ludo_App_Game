@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math' as math;
@@ -91,6 +92,10 @@ class GameState extends ChangeNotifier {
   }
 
   initialize() {
+    if (kReleaseMode) {
+      _curPage = 1;
+      _curPageOption = PageOption.None;
+    }
     setTurnsForPlayers(4);
 
     generatePlayerPieces();
@@ -670,21 +675,42 @@ class GameState extends ChangeNotifier {
   }
 
 // ------------------------------------------------------------------------------------------- HOME PAGE
-  int _curPage = 1;
+  int _curPage = 4;
 
   get curPage => _curPage;
 
-  PageOption _curPageOption;
+  PageOption _curPageOption = PageOption.JoinRoom;
 
   get curPageOption => _curPageOption;
 
   pageBack() {
     if (_curPage > 1) --_curPage;
+    if (_curPageOption == PageOption.InsideRoom) {
+      // remove user
+      Fire.instance.removeUserFromRoom(
+          userName, roomName); // todo check make roomName='' ?
+    }
     notifyListeners();
   }
 
   pageForward(PageOption po) {
     if (_curPage < 4) ++_curPage;
+//    switch (po) { // todo check this
+//      case PageOption.CreateUsername:
+//      case PageOption.SignIn:
+//        _curPage = 2;
+//        break;
+//      case PageOption.CreateRoom:
+//      case PageOption.JoinRoom:
+//        _curPage = 4;
+//        break;
+//      case PageOption.StartGame:
+//        break;
+//      case PageOption.None:
+//        ++_curPage;
+//        break;
+//      default:
+//    }
     _curPageOption = po;
     notifyListeners();
   }
@@ -699,12 +725,39 @@ class GameState extends ChangeNotifier {
   }
 
 // -------------------------------------------------------------------------------------- ONLINE STUFF
-  User _user;
+  User _user = User(name: 'u4');
 
   get user => _user;
 
   set user(User val) {
     _user = val;
+    notifyListeners();
+  }
+
+  String _userName = 'u4';
+
+  get userName => _userName;
+
+  set userName(String val) {
+    _userName = val;
+    notifyListeners();
+  }
+
+  String _roomName = 'hiya';
+
+  get roomName => _roomName;
+
+  set roomName(String val) {
+    _roomName = val;
+    notifyListeners();
+  }
+
+  String _gameID;
+
+  get gameID => _gameID;
+
+  set gameID(String val) {
+    _gameID = val;
     notifyListeners();
   }
 }

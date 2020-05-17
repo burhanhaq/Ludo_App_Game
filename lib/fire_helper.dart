@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:core';
+import 'dart:io';
+
 import 'constants.dart';
+import 'models/user.dart';
 
 class Fire {
   static const GAMES_COLLECTION = 'games';
@@ -13,8 +16,9 @@ class Fire {
   static const GAMES = 'games';
   static const WINS = 'wins';
   static const ROOM_ID = 'roomID';
+  static const PRIVATE_ROOM = 'privateRoom';
   static const GAME_ID = 'gameID';
-  static const PLAYER_IDS = 'playerIDs';
+  static const PLAYER_NAMES = 'playerNames';
   static const MOVES_LIST = 'movesList';
   static const LOCATION_LIST = 'locationList';
   static const TURN = 'turn';
@@ -38,18 +42,51 @@ class Fire {
 //    createRoom('room3');
 //    createRoom('room4');
 //    createGame('1589372798929');
-    addLossToUser('1589372580534');
+//    addLossToUser('1589372580534');
+//    createUserWithUsername('u1');
+//    createUserWithUsername('u2');
+//    createUserWithUsername('u3');
+//    createUserWithUsername('u4');
+//    createUserWithUsername('u5');
+//    createUserWithUsername('u6');
+//    createUserWithUsername('u7');
   }
 
-  createUser(String username) async {
-    var userID = DateTime.now().millisecondsSinceEpoch.toString();
-    userCollection.document(userID).setData({
-      NAME: username,
-      USER_ID: userID,
-      GAMES: 0,
-      WINS: 0,
-    }).catchError((error) => null);
-    return userID;
+  createUser(User user) async {
+    var userID = user.hashCode.toString();
+    await userCollection
+        .document(userID)
+        .setData(user.toJson())
+        .catchError((error) => null);
+  }
+
+  createUserWithUsername(String userName) async {
+    var userID = User.h(userName);
+    User user = User(name: userName);
+    await userCollection
+        .document(userID)
+        .setData(user.toJson())
+        .catchError((error) => null);
+  }
+
+  doesUserExist(String username) async {
+    var user;
+    await userCollection
+        .document(User.h(username))
+        .get()
+        .then((DocumentSnapshot ds) {
+      if (ds.exists) user = User.fromJson(ds.data);
+    });
+    return await user;
+  }
+
+  doesRoomExist(String roomname) async {
+    var roomID = roomname.toLowerCase().hashCode.toString();
+    bool exists = false;
+    await roomCollection.document(roomID).get().then((DocumentSnapshot ds) {
+      if (ds.exists) exists = true;
+    });
+    return exists;
   }
 
   addWinToUser(String userID) {
@@ -67,43 +104,35 @@ class Fire {
     });
   }
 
-  getUsers() async {
-    List userList = [];
-    await userCollection.getDocuments().then((value) {
-      value.documents.forEach((element) {
-        userList.add(element.data);
-      });
-    });
-    return userList;
-  }
-
-  createRoom(String roomname) async {
-    var roomID = DateTime.now().millisecondsSinceEpoch.toString();
+  createRoom(String roomname, {bool private = false}) async {
+    var roomID = roomname.toLowerCase().hashCode.toString();
     await roomCollection.document(roomID).setData({
       NAME: roomname,
-      ROOM_ID: roomID,
+      PRIVATE_ROOM: private,
       GAME_ID: '0',
-      PLAYER_IDS: [],
+      PLAYER_NAMES: [],
     }).catchError((error) => null);
     return roomID;
   }
 
-  getRooms() async {
-    var doc = await roomCollection.getDocuments();
-    return doc.documents;
-  }
+//  getRooms() async {
+//    var doc = await roomCollection.getDocuments();
+//    return doc.documents;
+//  }
 
-  addUserToRoom(String userID, String roomID) async {
+  addUserToRoom(String username, String roomname) async {
+    var roomID = roomname.toLowerCase().hashCode.toString();
     var doc = roomCollection.document(roomID);
     doc.updateData({
-      PLAYER_IDS: FieldValue.arrayUnion([userID]),
+      PLAYER_NAMES: FieldValue.arrayUnion([username]),
     });
   }
 
-  removeUserFromRoom(String userID, String roomID) {
+  removeUserFromRoom(String username, String roomname) {
+    var roomID = roomname.toLowerCase().hashCode.toString();
     var doc = roomCollection.document(roomID);
     doc.updateData({
-      PLAYER_IDS: FieldValue.arrayRemove([userID]),
+      PLAYER_NAMES: FieldValue.arrayRemove([username]),
     });
   }
 
@@ -117,7 +146,7 @@ class Fire {
         .document(roomID)
         .get()
         .then((value) {
-      playerIDs = value.data[PLAYER_IDS];
+      playerIDs = value.data[PLAYER_NAMES];
     });
     var gameID = DateTime.now().millisecondsSinceEpoch.toString();
     gameCollection.document(gameID).setData({
@@ -125,7 +154,7 @@ class Fire {
       MOVES_LIST: diceMovesList,
       LOCATION_LIST: locationList,
       ROOM_ID: roomID,
-      PLAYER_IDS: playerIDs,
+      PLAYER_NAMES: playerIDs,
       TURN: turn,
     }).catchError((error) => null);
     addGameIDToRoom(gameID, roomID);
@@ -139,7 +168,8 @@ class Fire {
     return 1;
   }
 
-  updateFireState(gameID, movesList, locationList, turn) {
+  updateFireState(
+      String gameID, String movesList, List locationList, PieceType turn) {
     gameCollection.document(gameID).updateData({
       MOVES_LIST: movesList,
       LOCATION_LIST: locationList,
@@ -147,35 +177,27 @@ class Fire {
     }).catchError((error) => null);
   }
 
-//  getFireState() {}
-
   Stream<QuerySnapshot> get roomQuery {
     return roomCollection.snapshots();
   }
 
-  Stream<QuerySnapshot> get userQuery {
-    return userCollection.snapshots();
+  Stream<DocumentSnapshot> roomStream(String roomname) {
+    var userID = roomname.toLowerCase().hashCode.toString();
+    return roomCollection.document(userID).snapshots();
   }
+
+//  Stream<QuerySnapshot> get userQuery {
+//    return userCollection.snapshots();
+//  }
 
   Stream<DocumentSnapshot> gameStream(String gameID) {
     return gameCollection.document(gameID).snapshots();
   }
 
-  // ignore: close_sinks
   StreamController<List<dynamic>> locationController =
       StreamController<List<dynamic>>.broadcast();
-  StreamController<Map<String, dynamic>> everythingController =
+  StreamController<Map<String, dynamic>> fullGameController =
       StreamController<Map<String, dynamic>>.broadcast();
-
-//  Stream listenForNewLocation() { // Queryies all
-//    gameCollection.snapshots().listen((snapshot) {
-//      if (snapshot.documents.isNotEmpty) {
-//        var locationListThing = snapshot.documents.map((snap) => snap.data['location_array']).toList();
-//        controller.add(locationListThing);
-//      }
-//    });
-//    return controller.stream;
-//  }
 
   Stream listenForNewLocation() {
     gameStream('1589373131638').listen((snapshot) {
@@ -191,12 +213,21 @@ class Fire {
     gameStream('1589373131638').listen((snapshot) {
       if (snapshot.data.isNotEmpty) {
         var locationListThing = snapshot.data;
-        everythingController.add(locationListThing);
+        fullGameController.add(locationListThing);
       }
     });
-    return everythingController.stream;
+    return fullGameController.stream;
   }
 
+//  Stream listenForNewLocation() { // Queryies all
+//    gameCollection.snapshots().listen((snapshot) {
+//      if (snapshot.documents.isNotEmpty) {
+//        var locationListThing = snapshot.documents.map((snap) => snap.data['location_array']).toList();
+//        controller.add(locationListThing);
+//      }
+//    });
+//    return controller.stream;
+//  }
   deleteRoom() {}
 
   deleteGame() {}
