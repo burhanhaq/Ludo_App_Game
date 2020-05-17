@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:ludo_app/player_piece.dart';
 import 'package:provider/provider.dart';
 
 import '../constants.dart';
@@ -7,7 +8,6 @@ import '../piece_home.dart';
 import '../game_state.dart';
 import '../fire_helper.dart';
 import '../models/user.dart';
-
 
 class PageFour extends StatefulWidget {
   @override
@@ -22,7 +22,7 @@ class _PageFourState extends State<PageFour> {
     GameState gameState = Provider.of<GameState>(context);
     double width = MediaQuery.of(context).size.width * kPageOpenWidthMultiplier;
     double height = (MediaQuery.of(context).size.height -
-        MediaQuery.of(context).padding.top) *
+            MediaQuery.of(context).padding.top) *
         kHeightMultiplier;
 
     var createRoomWidget = Column(
@@ -47,7 +47,7 @@ class _PageFourState extends State<PageFour> {
                 if (roomExists) {
                   // bad
                   supportText =
-                  'Room already exists. Either enter another room name to create or join the existing room.';
+                      'Room already exists. Either enter another room name to create or join the existing room.';
                 } else {
                   // good
                   await Fire.instance.createRoom(gameState.roomName);
@@ -103,14 +103,17 @@ class _PageFourState extends State<PageFour> {
                         roomList.add(element.data);
                       });
                       var roomWidgetList =
-                      List.generate(roomList.length, (index) {
+                          List.generate(roomList.length, (index) {
                         String roomName = roomList[index][Fire.NAME];
-                        String numPlayerInRoom =
-                        roomList[index][Fire.PLAYER_NAMES].length.toString();
+                        String numPlayerInRoom = roomList[index]
+                                [Fire.PLAYER_NAMES]
+                            .length
+                            .toString();
                         return GestureDetector(
                           onTap: () {
                             gameState.roomName = roomList[index][Fire.NAME];
-                            Fire.instance.addUserToRoom(gameState.user.name, gameState.roomName);
+                            Fire.instance.addUserToRoom(
+                                gameState.user.name, gameState.roomName);
                             gameState.pageForward(PageOption.InsideRoom);
                           },
                           child: Container(
@@ -166,12 +169,46 @@ class _PageFourState extends State<PageFour> {
           builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
             if (snapshot.hasData) {
               String roomName = gameState.roomName;
-              List<dynamic> playerIDList = snapshot.data.data[Fire.PLAYER_NAMES];
-              var columnList = List.generate(
-                  playerIDList.length, (index) => Text(playerIDList[index]));
-              columnList.insert(0, Text(roomName));
-              return Column(
-                children: columnList,
+              List<dynamic> playerIDList =
+                  snapshot.data.data[Fire.PLAYER_NAMES];
+
+              List<Widget> columnList = List.generate(
+                playerIDList.length,
+                (index) => Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    SizedBox(width: 60),
+                    Container(
+                      height: 20,
+                      width: 20,
+                      decoration: BoxDecoration(
+                        color: PlayerPiece.getColor(
+                          gameState.initialPlayerPieceTypeFormation[index],
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Text(playerIDList[index], style: kPageFourStyle),
+                  ],
+                ),
+              );
+              columnList.insert(
+                  0,
+                  Divider(
+                    color: white,
+                    indent: 20,
+                    endIndent: 20,
+                  ));
+              columnList.insert(0, Text(roomName, style: kPageFourStyle));
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 40),
+                color: Colors.grey[500],
+                height: 200,
+                width: double.infinity,
+                child: Column(
+                  children: columnList,
+                ),
               );
             }
             return Text('Please join another room');

@@ -724,7 +724,7 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-// -------------------------------------------------------------------------------------- ONLINE STUFF
+// ------------------------------------------------------------------------------------ ONLINE STUFF
   User _user = User(name: 'u4');
 
   get user => _user;
@@ -760,4 +760,21 @@ class GameState extends ChangeNotifier {
     _gameID = val;
     notifyListeners();
   }
+
+// ------------------------------------------------------------------------------------ LOCAL STUFF
+  PieceType _curPlayerPieceType;
+
+  get curPlayerPieceType => _curPlayerPieceType;
+
+  set curPlayerPieceType(PieceType val) {
+    _curPlayerPieceType = val;
+    notifyListeners();
+  }
+
+  var initialPlayerPieceTypeFormation = [
+    PieceType.Green,
+    PieceType.Red,
+    PieceType.Blue,
+    PieceType.Yellow
+  ];
 }
