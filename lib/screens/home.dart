@@ -129,9 +129,11 @@ class _PageContainerState extends State<PageContainer>
     if (selected) {
       sizeController.forward();
       width *= kPageOpenWidthMultiplier;
+      height *= 1;
     } else {
       sizeController.reverse();
       width *= kPageClosedWidthMultiplier;
+      height *= 0.4;
     }
     if (gameState.curPageOption == PageOption.StartGame) {
       width = 0;

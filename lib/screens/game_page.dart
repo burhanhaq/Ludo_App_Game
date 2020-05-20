@@ -97,8 +97,6 @@ class _GamePageState extends State<GamePage> {
     );
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     var gameState = Provider.of<GameState>(context);
@@ -107,14 +105,23 @@ class _GamePageState extends State<GamePage> {
       if (event.exists) {
         String movesString = event.data[Fire.MOVES_LIST];
         List<int> movesList = GameState.stringToIntList(movesString);
-//        if (!listEquals(gameState.movesList, movesList)) {
-//          gameState.movesList = movesList;
-//          print(movesString);
-//        }
+        if (!listEquals(gameState.movesList, movesList)) {
+          gameState.movesList = movesList;
+          print(movesList);
+        }
+
+        var fireTurn = event.data[Fire.TURN];
+        if (gameState.getTurn().index != fireTurn) {
+          print('index  --  fireTurn');
+          print('   ${gameState.getTurn().index}   --   $fireTurn');
+          gameState.setTurn(fireTurn);
+//          gameState.changeTurn(); // todo this might work
+        } else {
+          print('==');
+          print('   ${gameState.getTurn().index}   --   $fireTurn');
+        }
       }
     });
-
-
 
     Color stateColor = PlayerPiece.getColor(gameState.getTurn());
     generateSelectedDiceList(gameState);

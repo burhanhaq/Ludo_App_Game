@@ -11,13 +11,20 @@ import 'models/user.dart';
 
 class GameState extends ChangeNotifier {
   List<Slot> slotList = List.generate(13 * 4, (index) => Slot(id: index + 1));
-  List<int> movesList = [];
+  List<int> _movesList = [];
   bool extraThrowToken = false;
   List<PieceType> pieceTurn = [];
   List<PieceType> winnerList = [];
   int selectedDiceIndex = 0;
   int _lastMove = 1;
   bool gameOver = false;
+
+  get movesList => _movesList;
+
+  set movesList(List val) {
+    _movesList = val;
+    notifyListeners();
+  }
 
   get lastMoveOnDice => _lastMove;
 
@@ -200,17 +207,6 @@ class GameState extends ChangeNotifier {
       return true;
     }
 
-//    bool anyPieceCanMove = list.any((element) =>
-//    !element.isAtHome() && // some piece not at home and
-//        !element.isRunComplete() && // some piece run not complete and
-//        (element.isAtEndColumn && // (some piece at end column and
-//            movesList.any((move) =>
-//            move <=
-//                kMaxLoc -
-//                    element
-//                        .location) || // any move <= kMaxLoc - location) or
-//            !element.isAtEndColumn) // some piece not at end column
-//    );
     bool anyPieceCanMove = list.any((element) =>
             !element.isAtHome() && // some piece not at home and
             !element.isRunComplete() && // some piece run not complete and
@@ -247,7 +243,7 @@ class GameState extends ChangeNotifier {
   void diceTap() {
     if (gameOver) return;
     PieceType turn = getTurn();
-//    if (curPlayerPieceType != turn) return null;
+    if (curPlayerPieceType != turn) return;
     bool canThrow = canThrowDice();
     if (!canThrow) return;
     extraThrowToken = false;
@@ -295,6 +291,46 @@ class GameState extends ChangeNotifier {
     pieceTurn.add(pieceTurn.removeAt(0));
     Fire.instance.updateTurn(gameID, pieceTurn.first);
     clearMovesList();
+    notifyListeners();
+  }
+
+  setTurn(int turn) {
+    switch (turn) {
+      case 0:
+        pieceTurn = [
+          PieceType.Green,
+          PieceType.Blue,
+          PieceType.Red,
+          PieceType.Yellow,
+        ];
+        break;
+      case 1:
+        pieceTurn = [
+          PieceType.Blue,
+          PieceType.Red,
+          PieceType.Yellow,
+          PieceType.Green,
+        ];
+        break;
+      case 2:
+        pieceTurn = [
+          PieceType.Red,
+          PieceType.Yellow,
+          PieceType.Green,
+          PieceType.Blue,
+        ];
+        break;
+      case 3:
+        pieceTurn = [
+          PieceType.Yellow,
+          PieceType.Green,
+          PieceType.Blue,
+          PieceType.Red,
+        ];
+        break;
+    }
+    print('changed');
+    notifyListeners();
   }
 
   bool canDelete(int slotId) {
@@ -360,7 +396,6 @@ class GameState extends ChangeNotifier {
 
   movePiece(PlayerPiece pp, int moveDistance) {
     if (pp.location > 100) {
-//    if (pp.isAtEndColumn) {
       movePieceInEndCol(pp, moveDistance);
     } else if (checkAddToEndCol(pp, moveDistance)) {
       movePieceToEndCol(pp, moveDistance);
@@ -742,11 +777,12 @@ class GameState extends ChangeNotifier {
   }
 
 // ------------------------------------------------------------------------------------------- HOME PAGE
-  int _curPage = 4;
+  int _curPage = 1;
 
   get curPage => _curPage;
 
-  PageOption _curPageOption = PageOption.JoinRoom;
+//  PageOption _curPageOption = PageOption.JoinRoom;
+  PageOption _curPageOption;
 
   get curPageOption => _curPageOption;
 
@@ -812,7 +848,7 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  String _roomName = 'hiya';
+  String _roomName;
 
   get roomName => _roomName;
 

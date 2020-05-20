@@ -169,6 +169,15 @@ class _PageFourState extends State<PageFour> {
         roomStream.listen((DocumentSnapshot event) {
       if (event.exists) {
         List<dynamic> playerNameList = event.data[Fire.PLAYER_NAMES];
+        var gameID = event.data[Fire.GAME_ID];
+        if (gameID.toString().length > 0) {
+          if (gameState.gameID == null) {
+            gameState.gameID = event.data[Fire.GAME_ID];
+            gameState.pageForward(PageOption.StartGame);
+            print('ID: >>> ${gameState.gameID}');
+          }
+        }
+
         if (!listEquals(gameState.playerNameList, playerNameList)) {
           gameState.playerNameList = playerNameList;
           var usernameIndex =
