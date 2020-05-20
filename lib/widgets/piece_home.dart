@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'constants.dart';
-import 'game_state.dart';
-import 'player_piece.dart';
+import '../constants.dart';
+import '../game_state.dart';
+import '../models/player_piece.dart';
 
 class PieceHome extends StatefulWidget {
   final PieceType pt;
@@ -27,7 +27,11 @@ class _PieceHomeState extends State<PieceHome> {
     List<Widget> widgetPieceList = List.generate(
       piecesList.length,
       (index) => GestureDetector(
-        onTap: () => gameState.pieceTap(piecesList[index]),
+        onTap: () {
+          if (gameState.getPlayerPieceList(widget.pt)[index].location == 0) {
+            gameState.pieceTap(piecesList[index]);
+          }
+        },
         child: Container(
           height: kPieceSize - 5,
           width: kPieceSize - 5,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:ludo_app/fire_helper.dart';
+
+import '../constants.dart';
+import '../helper/fire_helper.dart';
 
 class User {
   String name;
@@ -31,11 +33,7 @@ class User {
   }
 
   @override
-  int get hashCode => this.name.toLowerCase().hashCode;
-
-  static String h(String username) {
-    return username.toLowerCase().hashCode.toString();
-  }
+  int get hashCode => int.tryParse(kHash(this.name));
 
   @override
   String toString() {

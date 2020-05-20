@@ -3,8 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:core';
 import 'dart:io';
 
-import 'constants.dart';
-import 'models/user.dart';
+import '../constants.dart';
+import '../models/user.dart';
 
 class Fire {
   static const GAMES_COLLECTION = 'games';
@@ -53,16 +53,16 @@ class Fire {
   }
 
   createUser(User user) async {
-    var userID = user.hashCode.toString();
+    var userID = kHash(user.name);
     await userCollection
         .document(userID)
         .setData(user.toJson())
         .catchError((error) => null);
   }
 
-  createUserWithUsername(String userName) async {
-    var userID = User.h(userName);
-    User user = User(name: userName);
+  createUserWithUsername(String username) async {
+    var userID = kHash(username);
+    User user = User(name: username);
     await userCollection
         .document(userID)
         .setData(user.toJson())
@@ -72,7 +72,7 @@ class Fire {
   doesUserExist(String username) async {
     var user;
     await userCollection
-        .document(User.h(username))
+        .document(kHash(username))
         .get()
         .then((DocumentSnapshot ds) {
       if (ds.exists) user = User.fromJson(ds.data);
@@ -81,7 +81,7 @@ class Fire {
   }
 
   doesRoomExist(String roomname) async {
-    var roomID = roomname.toLowerCase().hashCode.toString();
+    var roomID = kHash(roomname);
     bool exists = false;
     await roomCollection.document(roomID).get().then((DocumentSnapshot ds) {
       if (ds.exists) exists = true;
@@ -105,13 +105,13 @@ class Fire {
   }
 
   createRoom(String roomname, {bool private = false}) async {
-    var roomID = roomname.toLowerCase().hashCode.toString();
+    var roomID = kHash(roomname);
     await roomCollection.document(roomID).setData({
       NAME: roomname,
       PRIVATE_ROOM: private,
-      GAME_ID: '0',
+      GAME_ID: '',
       PLAYER_NAMES: [],
-    }).catchError((error) => null);
+    }).catchError((error) => print('Error in createRoom()'));
     return roomID;
   }
 
@@ -120,8 +120,9 @@ class Fire {
 //    return doc.documents;
 //  }
 
+  // todo don't add more than 4 players
   addUserToRoom(String username, String roomname) async {
-    var roomID = roomname.toLowerCase().hashCode.toString();
+    var roomID = kHash(roomname);
     var doc = roomCollection.document(roomID);
     doc.updateData({
       PLAYER_NAMES: FieldValue.arrayUnion([username]),
@@ -129,24 +130,25 @@ class Fire {
   }
 
   removeUserFromRoom(String username, String roomname) {
-    var roomID = roomname.toLowerCase().hashCode.toString();
+    var roomID = kHash(roomname);
     var doc = roomCollection.document(roomID);
     doc.updateData({
       PLAYER_NAMES: FieldValue.arrayRemove([username]),
     });
   }
 
-  createGame(String roomID) async {
+  createGame(String roomname) async {
+    var roomID = kHash(roomname);
     var diceMovesList = '';
     var locationList = ['0,0,0,0', '0,0,0,0', '0,0,0,0', '0,0,0,0'];
     var turn = 0;
-    var playerIDs = [];
+    var playerNames = [];
     await Firestore.instance
         .collection(ROOMS_COLLECTION)
         .document(roomID)
         .get()
         .then((value) {
-      playerIDs = value.data[PLAYER_NAMES];
+      playerNames = value.data[PLAYER_NAMES];
     });
     var gameID = DateTime.now().millisecondsSinceEpoch.toString();
     gameCollection.document(gameID).setData({
@@ -154,18 +156,18 @@ class Fire {
       MOVES_LIST: diceMovesList,
       LOCATION_LIST: locationList,
       ROOM_ID: roomID,
-      PLAYER_NAMES: playerIDs,
+      PLAYER_NAMES: playerNames,
       TURN: turn,
     }).catchError((error) => null);
-    addGameIDToRoom(gameID, roomID);
+    _addGameIDToRoom(gameID, roomID);
     return gameID;
   }
 
-  addGameIDToRoom(String gameID, String roomID) {
+  _addGameIDToRoom(String gameID, String roomID) {
     roomCollection.document(roomID).updateData({
-      GAME_ID: roomID,
+      GAME_ID: gameID,
     }).catchError((error) => null);
-    return 1;
+//    return 1;
   }
 
   updateFireState(
@@ -177,13 +179,31 @@ class Fire {
     }).catchError((error) => null);
   }
 
+  updateMovesList(String gameID, String movesList) {
+    gameCollection.document(gameID).updateData({
+      MOVES_LIST: movesList,
+    }).catchError((onError) => print(onError));
+  }
+
+  updateLocationList(String gameID, List<String> locationList) {
+    gameCollection.document(gameID).updateData({
+      LOCATION_LIST: locationList,
+    });
+  }
+
+  updateTurn(String gameID, PieceType turn) {
+    gameCollection.document(gameID).updateData({
+      TURN: turn.index,
+    });
+  }
+
   Stream<QuerySnapshot> get roomQuery {
     return roomCollection.snapshots();
   }
 
   Stream<DocumentSnapshot> roomStream(String roomname) {
-    var userID = roomname.toLowerCase().hashCode.toString();
-    return roomCollection.document(userID).snapshots();
+    var roomID = kHash(roomname);
+    return roomCollection.document(roomID).snapshots();
   }
 
 //  Stream<QuerySnapshot> get userQuery {
@@ -231,4 +251,5 @@ class Fire {
   deleteRoom() {}
 
   deleteGame() {}
+
 }

@@ -1,14 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'dart:math' as math;
 
-import 'column_area.dart';
 import 'constants.dart';
-import 'slot.dart';
-import 'custom_box.dart';
-import 'player_piece.dart';
-import 'fire_helper.dart';
+import 'widgets/slot.dart';
+import 'widgets/custom_box.dart';
+import 'models/player_piece.dart';
+import 'helper/fire_helper.dart';
 import 'models/user.dart';
 
 class GameState extends ChangeNotifier {
@@ -43,13 +41,13 @@ class GameState extends ChangeNotifier {
   Slot getEndSlot(PieceType pt, int id) {
     switch (pt) {
       case PieceType.Green:
-        return greenEndList[id - 1];
+        return greenEndList[id - 1 - 100];
       case PieceType.Blue:
-        return blueEndList[id - 1];
+        return blueEndList[id - 1 - 100];
       case PieceType.Red:
-        return redEndList[id - 1];
+        return redEndList[id - 1 - 100];
       case PieceType.Yellow:
-        return yellowEndList[id - 1];
+        return yellowEndList[id - 1 - 100];
     }
     return null;
   }
@@ -81,14 +79,14 @@ class GameState extends ChangeNotifier {
 
   setPieceOnEndSlot(PlayerPiece pp, int id) {
     pp.location = id;
-    pp.isAtEndColumn = true;
+//    pp.isAtEndColumn = true;
     getEndSlot(pp.pieceType, id).playerPieceList.add(pp);
     notifyListeners();
   }
 
   setPieceWon(PlayerPiece pp) {
     pp.location = 6;
-    pp.isAtEndColumn = true;
+//    pp.isAtEndColumn = true;
   }
 
   initialize() {
@@ -155,7 +153,6 @@ class GameState extends ChangeNotifier {
   pieceTap(PlayerPiece pp) {
     if (gameOver) return;
     print('Tapped Slot');
-    print('index: $selectedDiceIndex');
     if (pp == null) return;
     if (canThrowDice()) return;
     if (pp.pieceType == getTurn()) {
@@ -167,6 +164,7 @@ class GameState extends ChangeNotifier {
         } else {
           movePiece(pp, movesList[selectedDiceIndex]);
         }
+        updateFireLocationList();
       } else {
         print('No moves available. Tap Dice for moves');
       }
@@ -202,34 +200,64 @@ class GameState extends ChangeNotifier {
       return true;
     }
 
+//    bool anyPieceCanMove = list.any((element) =>
+//    !element.isAtHome() && // some piece not at home and
+//        !element.isRunComplete() && // some piece run not complete and
+//        (element.isAtEndColumn && // (some piece at end column and
+//            movesList.any((move) =>
+//            move <=
+//                kMaxLoc -
+//                    element
+//                        .location) || // any move <= kMaxLoc - location) or
+//            !element.isAtEndColumn) // some piece not at end column
+//    );
     bool anyPieceCanMove = list.any((element) =>
             !element.isAtHome() && // some piece not at home and
             !element.isRunComplete() && // some piece run not complete and
-            (element.isAtEndColumn && // (some piece at end column and
+            (element.location > 100 && // (some piece at end column and
                     movesList.any((move) =>
                         move <=
-                        kMaxLoc -
+                        kEndLocation -
                             element
                                 .location) || // any move <= kMaxLoc - location) or
-                !element.isAtEndColumn) // some piece not at end column
+                element.location < 100) // some piece not at end column
         );
 
     return anyPieceCanMove;
   }
 
+  void addLastMoveToMovesList() {
+    movesList.add(_lastMove);
+    Fire.instance.updateMovesList(gameID, intListToString(movesList));
+    notifyListeners();
+  }
+
+  void clearMovesList() {
+    movesList.clear();
+    Fire.instance.updateMovesList(gameID, '');
+    notifyListeners();
+  }
+
+  void removeNumFromMovesList(int num) {
+    movesList.remove(num);
+    Fire.instance.updateMovesList(gameID, intListToString(movesList));
+    notifyListeners();
+  }
+
   void diceTap() {
     if (gameOver) return;
     PieceType turn = getTurn();
+//    if (curPlayerPieceType != turn) return null;
     bool canThrow = canThrowDice();
     if (!canThrow) return;
     extraThrowToken = false;
-    int diceNum = throwDice();
-    movesList.add(diceNum);
+    throwDice();
+    addLastMoveToMovesList();
     canThrow = canThrowDice();
     bool anyPieceCanMove = canAnyPieceMove(turn);
     if (!canThrow && !anyPieceCanMove) {
       print('clearing: $movesList');
-      movesList.clear();
+      clearMovesList();
     }
     if (movesList.isEmpty) {
       changeTurn();
@@ -248,9 +276,9 @@ class GameState extends ChangeNotifier {
         if (movesList[len - 1] == 6 && // first one is redundant
             movesList[len - 2] == 6 &&
             movesList[len - 3] == 6) {
-          movesList.removeLast();
-          movesList.removeLast();
-          movesList.removeLast();
+          removeNumFromMovesList(6);
+          removeNumFromMovesList(6);
+          removeNumFromMovesList(6);
           notifyListeners();
           return false;
         }
@@ -265,7 +293,8 @@ class GameState extends ChangeNotifier {
 
   changeTurn() {
     pieceTurn.add(pieceTurn.removeAt(0));
-    movesList.clear();
+    Fire.instance.updateTurn(gameID, pieceTurn.first);
+    clearMovesList();
   }
 
   bool canDelete(int slotId) {
@@ -290,7 +319,7 @@ class GameState extends ChangeNotifier {
     extraThrowToken = true;
     var pieceList = getSlot(slotId).playerPieceList;
     PlayerPiece topPiece = pieceList.last;
-    List<PlayerPiece> otherPieces = [];
+    List<PlayerPiece> otherPieces = []; // todo reduce code
     getSlot(slotId).playerPieceList.forEach((element) {
       if (element.pieceType != topPiece.pieceType) {
         otherPieces.add(element);
@@ -317,16 +346,12 @@ class GameState extends ChangeNotifier {
   }
 
   addPiece(PlayerPiece pp) {
-//    PlayerPiece pp;
     int homePosition = getHomePosition(pp.pieceType);
 
-//    Iterable<PlayerPiece> availablePieces = getPlayerPieceList(pt)
-//        .where((element) => element.location == kPieceHomeLocation);
     if (pp.isAtHome()) {
-//      pp = availablePieces.first;
       pp.location = homePosition;
       getSlot(homePosition).playerPieceList.add(pp);
-      movesList.remove(6);
+      removeNumFromMovesList(6);
     } else {
       print('AddPiece() No available pieces found');
     }
@@ -334,7 +359,8 @@ class GameState extends ChangeNotifier {
   }
 
   movePiece(PlayerPiece pp, int moveDistance) {
-    if (pp.isAtEndColumn) {
+    if (pp.location > 100) {
+//    if (pp.isAtEndColumn) {
       movePieceInEndCol(pp, moveDistance);
     } else if (checkAddToEndCol(pp, moveDistance)) {
       movePieceToEndCol(pp, moveDistance);
@@ -347,7 +373,7 @@ class GameState extends ChangeNotifier {
       pp.location = newLocation;
       getSlot(curLocation).playerPieceList.remove(pp);
       getSlot(newLocation).playerPieceList.add(pp);
-      movesList.remove(moveDistance);
+      removeNumFromMovesList(moveDistance);
       selectedDiceIndex = 0;
       if (canDelete(pp.location)) {
         deleteBottomPieces(pp.location);
@@ -360,6 +386,28 @@ class GameState extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  // todo simplify this please
+  updateFireLocationList() {
+    List<int> greenList = [];
+    List<int> blueList = [];
+    List<int> redList = [];
+    List<int> yellowList = [];
+    greenPlayerPieces.forEach((element) => greenList.add(element.location));
+    bluePlayerPieces.forEach((element) => blueList.add(element.location));
+    redPlayerPieces.forEach((element) => redList.add(element.location));
+    yellowPlayerPieces.forEach((element) => yellowList.add(element.location));
+    String greenStr = intListToString(greenList);
+    String blueStr = intListToString(blueList);
+    String redStr = intListToString(redList);
+    String yellowStr = intListToString(yellowList);
+
+    Fire.instance.gameCollection.document(gameID).updateData({
+      Fire.LOCATION_LIST: [greenStr, blueStr, redStr, yellowStr],
+    });
+  }
+
+  getFireLocationList() async {}
 
   int throwDice() {
     int num = math.Random().nextInt(kMaxDiceNum) + 1;
@@ -380,23 +428,28 @@ class GameState extends ChangeNotifier {
     }
   }
 
+  pieceFinishedRun(PlayerPiece pp) {
+    extraThrowToken = true;
+    clearMovesList();
+//    pp.isAtEndColumn = true;
+  }
+
   movePieceInEndCol(PlayerPiece pp, int moveDistance) {
     int curLocation = pp.location;
     int newLocation = curLocation + moveDistance;
 
-    if (newLocation > kMaxLoc) return;
-    if (newLocation == kMaxLoc) {
-      // todo add piece to triangle end
-      // won
-      extraThrowToken =
-          true; // todo add this to movePieceToEndCol() if piece wins
-      pp.isAtEndColumn = true;
-    }
+    if (newLocation > kEndLocation) return;
+
     // newLocation <= MAX_LOC
     pp.location = newLocation;
     getEndSlot(pp.pieceType, curLocation).playerPieceList.remove(pp);
     getEndSlot(pp.pieceType, newLocation).playerPieceList.add(pp);
-    movesList.remove(moveDistance);
+    removeNumFromMovesList(moveDistance);
+    if (newLocation == kEndLocation) {
+      // won
+      // todo add this to movePieceToEndCol() if piece wins
+      pieceFinishedRun(pp);
+    }
     if (didPlayerWin(pp.pieceType)) {
       playerFinishedRun();
     }
@@ -404,7 +457,7 @@ class GameState extends ChangeNotifier {
   }
 
   movePieceToEndCol(PlayerPiece pp, int moveDistance) {
-    pp.isAtEndColumn = true;
+//    pp.isAtEndColumn = true;
     int curLocation = pp.location;
     int endLocation;
     switch (pp.pieceType) {
@@ -421,13 +474,11 @@ class GameState extends ChangeNotifier {
         endLocation = moveDistance - (46 - curLocation);
         break;
     }
+    endLocation += 100;
     getSlot(curLocation).playerPieceList.remove(pp);
     pp.location = endLocation;
     getEndSlot(pp.pieceType, endLocation).playerPieceList.add(pp);
-    movesList.remove(moveDistance);
-//    if (endLocation == 6) {
-//      return;
-//    }
+    removeNumFromMovesList(moveDistance);
     notifyListeners();
   }
 
@@ -565,15 +616,15 @@ class GameState extends ChangeNotifier {
       CustomBox(getSlot(6)),
     ];
     _greenColumn2 = [
-      CustomBox(getEndSlot(PieceType.Green, 5),
+      CustomBox(getEndSlot(PieceType.Green, kFiveLocation),
           c: PlayerPiece.getColor(PieceType.Green)),
-      CustomBox(getEndSlot(PieceType.Green, 4),
+      CustomBox(getEndSlot(PieceType.Green, kFourLocation),
           c: PlayerPiece.getColor(PieceType.Green)),
-      CustomBox(getEndSlot(PieceType.Green, 3),
+      CustomBox(getEndSlot(PieceType.Green, kThreeLocation),
           c: PlayerPiece.getColor(PieceType.Green)),
-      CustomBox(getEndSlot(PieceType.Green, 2),
+      CustomBox(getEndSlot(PieceType.Green, kTwoLocation),
           c: PlayerPiece.getColor(PieceType.Green)),
-      CustomBox(getEndSlot(PieceType.Green, 1),
+      CustomBox(getEndSlot(PieceType.Green, kOneLocation),
           c: PlayerPiece.getColor(PieceType.Green)),
       CustomBox(getSlot(7)),
     ];
@@ -594,15 +645,15 @@ class GameState extends ChangeNotifier {
       CustomBox(getSlot(19)),
     ];
     _blueColumn2 = [
-      CustomBox(getEndSlot(PieceType.Blue, 5),
+      CustomBox(getEndSlot(PieceType.Blue, kFiveLocation),
           c: PlayerPiece.getColor(PieceType.Blue)),
-      CustomBox(getEndSlot(PieceType.Blue, 4),
+      CustomBox(getEndSlot(PieceType.Blue, kFourLocation),
           c: PlayerPiece.getColor(PieceType.Blue)),
-      CustomBox(getEndSlot(PieceType.Blue, 3),
+      CustomBox(getEndSlot(PieceType.Blue, kThreeLocation),
           c: PlayerPiece.getColor(PieceType.Blue)),
-      CustomBox(getEndSlot(PieceType.Blue, 2),
+      CustomBox(getEndSlot(PieceType.Blue, kTwoLocation),
           c: PlayerPiece.getColor(PieceType.Blue)),
-      CustomBox(getEndSlot(PieceType.Blue, 1),
+      CustomBox(getEndSlot(PieceType.Blue, kOneLocation),
           c: PlayerPiece.getColor(PieceType.Blue)),
       CustomBox(getSlot(20)),
     ];
@@ -623,15 +674,15 @@ class GameState extends ChangeNotifier {
       CustomBox(getSlot(32)),
     ];
     _redColumn2 = [
-      CustomBox(getEndSlot(PieceType.Red, 5),
+      CustomBox(getEndSlot(PieceType.Red, kFiveLocation),
           c: PlayerPiece.getColor(PieceType.Red)),
-      CustomBox(getEndSlot(PieceType.Red, 4),
+      CustomBox(getEndSlot(PieceType.Red, kFourLocation),
           c: PlayerPiece.getColor(PieceType.Red)),
-      CustomBox(getEndSlot(PieceType.Red, 3),
+      CustomBox(getEndSlot(PieceType.Red, kThreeLocation),
           c: PlayerPiece.getColor(PieceType.Red)),
-      CustomBox(getEndSlot(PieceType.Red, 2),
+      CustomBox(getEndSlot(PieceType.Red, kTwoLocation),
           c: PlayerPiece.getColor(PieceType.Red)),
-      CustomBox(getEndSlot(PieceType.Red, 1),
+      CustomBox(getEndSlot(PieceType.Red, kOneLocation),
           c: PlayerPiece.getColor(PieceType.Red)),
       CustomBox(getSlot(33)),
     ];
@@ -652,15 +703,15 @@ class GameState extends ChangeNotifier {
       CustomBox(getSlot(45)),
     ];
     _yellowColumn2 = [
-      CustomBox(getEndSlot(PieceType.Yellow, 5),
+      CustomBox(getEndSlot(PieceType.Yellow, kFiveLocation),
           c: PlayerPiece.getColor(PieceType.Yellow)),
-      CustomBox(getEndSlot(PieceType.Yellow, 4),
+      CustomBox(getEndSlot(PieceType.Yellow, kFourLocation),
           c: PlayerPiece.getColor(PieceType.Yellow)),
-      CustomBox(getEndSlot(PieceType.Yellow, 3),
+      CustomBox(getEndSlot(PieceType.Yellow, kThreeLocation),
           c: PlayerPiece.getColor(PieceType.Yellow)),
-      CustomBox(getEndSlot(PieceType.Yellow, 2),
+      CustomBox(getEndSlot(PieceType.Yellow, kTwoLocation),
           c: PlayerPiece.getColor(PieceType.Yellow)),
-      CustomBox(getEndSlot(PieceType.Yellow, 1),
+      CustomBox(getEndSlot(PieceType.Yellow, kOneLocation),
           c: PlayerPiece.getColor(PieceType.Yellow)),
       CustomBox(getSlot(46)),
     ];
@@ -672,6 +723,22 @@ class GameState extends ChangeNotifier {
       CustomBox(getSlot(48), c: PlayerPiece.getColor(PieceType.Yellow)),
       CustomBox(getSlot(47)),
     ];
+  }
+
+  static intListToString(List<int> intList) {
+    if (intList.isEmpty) return '';
+    String str = '';
+    intList.forEach((element) => str += element.toString() + ',');
+    str = str.substring(0, str.length - 1);
+    return str;
+  }
+
+  static stringToIntList(String s) {
+    if (s == '') return <int>[];
+    List<dynamic> stringArray = s.split(',');
+    List<int> intList = [];
+    stringArray.forEach((element) => intList.add(int.tryParse(element)));
+    return intList;
   }
 
 // ------------------------------------------------------------------------------------------- HOME PAGE
@@ -725,7 +792,8 @@ class GameState extends ChangeNotifier {
   }
 
 // ------------------------------------------------------------------------------------ ONLINE STUFF
-  User _user = User(name: 'u4');
+//  User _user = User(name: 'u4');
+  User _user;
 
   get user => _user;
 
@@ -734,7 +802,8 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  String _userName = 'u4';
+//  String _userName = 'u4';
+  String _userName;
 
   get userName => _userName;
 
@@ -761,13 +830,12 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-// ------------------------------------------------------------------------------------ LOCAL STUFF
-  PieceType _curPlayerPieceType;
+  List<dynamic> _playerNameList = [];
 
-  get curPlayerPieceType => _curPlayerPieceType;
+  get playerNameList => _playerNameList;
 
-  set curPlayerPieceType(PieceType val) {
-    _curPlayerPieceType = val;
+  set playerNameList(List val) {
+    _playerNameList = val;
     notifyListeners();
   }
 
@@ -777,4 +845,21 @@ class GameState extends ChangeNotifier {
     PieceType.Blue,
     PieceType.Yellow
   ];
+
+// ------------------------------------------------------------------------------------ LOCAL STUFF
+//  PieceType _curPlayerPieceType = PieceType.Green;
+  PieceType _curPlayerPieceType;
+
+  get curPlayerPieceType => _curPlayerPieceType;
+
+  set curPlayerPieceType(PieceType val) {
+    _curPlayerPieceType = val;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
 }

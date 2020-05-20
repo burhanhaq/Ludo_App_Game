@@ -2,11 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../constants.dart';
-import '../piece_home.dart';
-import '../game_state.dart';
-import '../fire_helper.dart';
-import '../models/user.dart';
+import '../../models/player_piece.dart';
+import '../../constants.dart';
+import '../../widgets/piece_home.dart';
+import '../../game_state.dart';
+import '../../helper/fire_helper.dart';
+import '../../models/user.dart';
 
 class PageTwo extends StatefulWidget {
   @override

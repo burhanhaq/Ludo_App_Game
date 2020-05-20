@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'constants.dart';
-import 'game_state.dart';
+import '../constants.dart';
+import '../game_state.dart';
 
 class ColumnArea extends StatefulWidget {
   final PieceType piece;

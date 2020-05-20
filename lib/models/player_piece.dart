@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'constants.dart';
+import '../constants.dart';
 
 class PlayerPiece {
   PieceType pieceType;
@@ -9,11 +9,11 @@ class PlayerPiece {
   int location;
 
 //  PieceType pieceTurn;
-  bool isAtEndColumn;
+//  bool isAtEndColumn;
 
   PlayerPiece({this.pieceId, this.pieceType}) {
     location = 0;
-    isAtEndColumn = false;
+//    isAtEndColumn = false;
     Color c = getColor(this.pieceType);
     container = Container(
       height: kPieceSize,
@@ -40,7 +40,8 @@ class PlayerPiece {
   }
 
   isRunComplete() {
-    return this.location == 6 && this.isAtEndColumn;
+    return this.location == 106;
+//    return this.location == 6 && this.isAtEndColumn;
   }
 
   @override
@@ -64,14 +65,9 @@ class PlayerPiece {
 
   @override
   bool operator ==(dynamic other) {
-    if (this.pieceId == other.pieceId) {
-     if (this.pieceType == other.pieceType) {
-       return true;
-     }
-    }
-    return false;
+    return this.pieceType == other.pieceType && this.pieceId == other.pieceId;
   }
 
   @override
-  int get hashCode => 31 * 17 + pieceId.hashCode;
+  int get hashCode => int.tryParse(kHash([pieceType, pieceId]));
 }

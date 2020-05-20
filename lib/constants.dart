@@ -33,7 +33,13 @@ const kSmallDiceSize = 40.0;
 const kNumPlayerPieces = 4;
 const kSelectedIconSize = 20.0;
 
-const kMaxLoc = 6;
+const kEndLocation = 106;
+const kOneLocation = 101;
+const kTwoLocation = 102;
+const kThreeLocation = 103;
+const kFourLocation = 104;
+const kFiveLocation = 105;
+
 const kMaxDiceNum = 6;
 const kSix = 6;
 
@@ -62,3 +68,18 @@ enum PageOption {
 
 const kPageOpenWidthMultiplier = 0.85;
 const kPageClosedWidthMultiplier = 0.05;
+
+kHash(element) {
+  element = element.toString().toLowerCase();
+  int hash = 31 * 17;
+  for (int i = 0; i < element.length - 1; i++) {
+    if (i % 2 == 0) {
+      hash += element.codeUnitAt(i);
+    } else if (i % 1 == 0) {
+      hash *= element.codeUnitAt(i);
+    }
+  }
+  String str = hash.toString();
+
+  return str.length > 10 ? str.substring(str.length - 10) : str;
+}

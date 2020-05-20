@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'player_piece.dart';
-import 'constants.dart';
+import '../models/player_piece.dart';
+import '../constants.dart';
 
 class Slot {
   final int id;

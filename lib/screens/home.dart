@@ -1,15 +1,14 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'column_area.dart';
-import 'constants.dart';
-import 'piece_home.dart';
-import 'game_state.dart';
-import 'dice.dart';
-import 'triangle_painter.dart';
-import 'player_piece.dart';
-import 'fire_helper.dart';
+import '../widgets/column_area.dart';
+import '../constants.dart';
+import '../widgets/piece_home.dart';
+import '../game_state.dart';
+import '../widgets/dice.dart';
+import '../widgets/triangle_painter.dart';
+import '../models/player_piece.dart';
+import '../helper/fire_helper.dart';
 import 'game_page.dart';
 import 'pages/page_one.dart';
 import 'pages/page_two.dart';
@@ -48,31 +47,36 @@ class _HomeState extends State<Home> {
           GamePage(),
           Opacity(
             opacity: 0.98,
-            child: Container(
-              color:  gameState.curPageOption == PageOption.StartGame ? trans : backColor,
-              child: Row(
-                children: <Widget>[
-                  PageContainer(
-                    c: PlayerPiece.getColor(PieceType.Blue),
-                    child: PageOne(),
-                    pageNum: 1,
-                  ),
-                  PageContainer(
-                    c: PlayerPiece.getColor(PieceType.Red),
-                    child: PageTwo(),
-                    pageNum: 2,
-                  ),
-                  PageContainer(
-                    c: PlayerPiece.getColor(PieceType.Green),
-                    child: PageThree(),
-                    pageNum: 3,
-                  ),
-                  PageContainer(
-                    c: PlayerPiece.getColor(PieceType.Yellow),
-                    child: PageFour(),
-                    pageNum: 4,
-                  ),
-                ],
+            child: Offstage(
+              offstage: gameState.curPageOption == PageOption.StartGame,
+              child: Container(
+                color: gameState.curPageOption == PageOption.StartGame
+                    ? trans
+                    : backColor,
+                child: Row(
+                  children: <Widget>[
+                    PageContainer(
+                      c: PlayerPiece.getColor(PieceType.Blue),
+                      child: PageOne(),
+                      pageNum: 1,
+                    ),
+                    PageContainer(
+                      c: PlayerPiece.getColor(PieceType.Red),
+                      child: PageTwo(),
+                      pageNum: 2,
+                    ),
+                    PageContainer(
+                      c: PlayerPiece.getColor(PieceType.Green),
+                      child: PageThree(),
+                      pageNum: 3,
+                    ),
+                    PageContainer(
+                      c: PlayerPiece.getColor(PieceType.Yellow),
+                      child: PageFour(),
+                      pageNum: 4,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

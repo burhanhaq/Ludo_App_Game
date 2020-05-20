@@ -1,16 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart';
 
-import 'column_area.dart';
-import 'constants.dart';
-import 'piece_home.dart';
-import 'game_state.dart';
-import 'dice.dart';
-import 'triangle_painter.dart';
-import 'player_piece.dart';
-import 'fire_helper.dart';
+import '../widgets/column_area.dart';
+import '../constants.dart';
+import '../widgets/piece_home.dart';
+import '../game_state.dart';
+import '../widgets/dice.dart';
+import '../widgets/triangle_painter.dart';
+import '../models/player_piece.dart';
+import '../helper/fire_helper.dart';
 
 class GamePage extends StatefulWidget {
   @override
@@ -21,12 +21,12 @@ class _GamePageState extends State<GamePage> {
   final middleAreaSize = (kBoxWidth + kBoxBorderWidth * 2) * 3;
 
   void listenToList() {
-    Fire.instance.listenForNewEverything().listen((data) {
-      var updated = data;
-      if (updated != null && updated.length > 0) {
-        print(updated);
-      }
-    });
+//    Fire.instance.listenForNewEverything().listen((data) {
+//      var updated = data;
+//      if (updated != null && updated.length > 0) {
+//        print(updated);
+//      }
+//    });
   }
 
   List<Color> selectedDiceList;
@@ -73,7 +73,8 @@ class _GamePageState extends State<GamePage> {
   getRowChild(GameState gameState, PieceType pt) {
     List<PlayerPiece> completedPiecesList = gameState
         .getPlayerPieceList(pt)
-        .where((element) => element.isRunComplete()).toList();
+        .where((element) => element.isRunComplete())
+        .toList();
 
     int rowLength = completedPiecesList.length;
     var topPiece = Container();
@@ -96,9 +97,25 @@ class _GamePageState extends State<GamePage> {
     );
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     var gameState = Provider.of<GameState>(context);
+
+    Fire.instance.gameStream(gameState.gameID).listen((event) {
+      if (event.exists) {
+        String movesString = event.data[Fire.MOVES_LIST];
+        List<int> movesList = GameState.stringToIntList(movesString);
+//        if (!listEquals(gameState.movesList, movesList)) {
+//          gameState.movesList = movesList;
+//          print(movesString);
+//        }
+      }
+    });
+
+
+
     Color stateColor = PlayerPiece.getColor(gameState.getTurn());
     generateSelectedDiceList(gameState);
     generateDiceMovesList(gameState, stateColor);

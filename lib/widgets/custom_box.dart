@@ -2,10 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'constants.dart';
-import 'game_state.dart';
+import '../constants.dart';
+import '../game_state.dart';
 import 'slot.dart';
-import 'player_piece.dart';
+import '../models/player_piece.dart';
 
 class CustomBox extends StatefulWidget {
   Slot slot;

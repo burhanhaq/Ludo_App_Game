@@ -1,13 +1,15 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:ludo_app/player_piece.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart';
 
-import '../constants.dart';
-import '../piece_home.dart';
-import '../game_state.dart';
-import '../fire_helper.dart';
-import '../models/user.dart';
+import '../../models/player_piece.dart';
+import '../../constants.dart';
+import '../../widgets/piece_home.dart';
+import '../../game_state.dart';
+import '../../helper/fire_helper.dart';
+import '../../models/user.dart';
 
 class PageFour extends StatefulWidget {
   @override
@@ -51,11 +53,10 @@ class _PageFourState extends State<PageFour> {
                 } else {
                   // good
                   await Fire.instance.createRoom(gameState.roomName);
-                  Fire.instance.addUserToRoom(
-                      gameState.userName.hashCode.toString(),
-                      gameState.roomName.hashCode.toString());
+//                  await Fire.instance.addUserToRoom(
+//                      kHash(gameState.userName), kHash(gameState.roomName));
                   supportText = 'Creating room ${gameState.roomName}';
-                  gameState.pageForward(PageOption.InsideRoom);
+                  gameState.pageForward(PageOption.JoinRoom);
                 }
               });
             });
@@ -162,22 +163,38 @@ class _PageFourState extends State<PageFour> {
 //        ),
       ],
     );
+    Stream<DocumentSnapshot> roomStream =
+        Fire.instance.roomStream(gameState.roomName);
+    StreamSubscription roomSubscription =
+        roomStream.listen((DocumentSnapshot event) {
+      if (event.exists) {
+        List<dynamic> playerNameList = event.data[Fire.PLAYER_NAMES];
+        if (!listEquals(gameState.playerNameList, playerNameList)) {
+          gameState.playerNameList = playerNameList;
+          var usernameIndex =
+              gameState.playerNameList.indexOf(gameState.user.name);
+          if (usernameIndex >= 0) {
+            gameState.curPlayerPieceType =
+                gameState.initialPlayerPieceTypeFormation[usernameIndex];
+          }
+        }
+      }
+    });
     var insideRoomWidget = Column(
       children: <Widget>[
         StreamBuilder(
-          stream: Fire.instance.roomStream(gameState.roomName),
+          // todo do we need stream builder
+          stream: roomStream,
           builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
             if (snapshot.hasData) {
               String roomName = gameState.roomName;
-              List<dynamic> playerIDList =
-                  snapshot.data.data[Fire.PLAYER_NAMES];
 
               List<Widget> columnList = List.generate(
-                playerIDList.length,
+                gameState.playerNameList.length,
                 (index) => Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    SizedBox(width: 60),
+                    SizedBox(width: 50),
                     Container(
                       height: 20,
                       width: 20,
@@ -188,8 +205,11 @@ class _PageFourState extends State<PageFour> {
                         shape: BoxShape.circle,
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Text(playerIDList[index], style: kPageFourStyle),
+                    SizedBox(width: 15),
+                    Text(
+                      gameState.playerNameList[index],
+                      style: kPageFourStyle,
+                    ),
                   ],
                 ),
               );
@@ -211,11 +231,15 @@ class _PageFourState extends State<PageFour> {
                 ),
               );
             }
-            return Text('Please join another room');
+            return Text('Loading');
           },
         ),
+        SizedBox(height: 40),
         GestureDetector(
-          onTap: () {
+          onTap: () async {
+            roomSubscription.cancel();
+            gameState.gameID =
+                await Fire.instance.createGame(gameState.roomName);
             gameState.pageForward(PageOption.StartGame);
           },
           child: Row(
@@ -267,5 +291,11 @@ class _PageFourState extends State<PageFour> {
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+//    xxx.cancel();
+    super.dispose();
   }
 }
