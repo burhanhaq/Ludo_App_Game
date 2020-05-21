@@ -133,7 +133,7 @@ class _PageContainerState extends State<PageContainer>
     } else {
       sizeController.reverse();
       width *= kPageClosedWidthMultiplier;
-      height *= 0.4;
+      height *= 0.2;
     }
     if (gameState.curPageOption == PageOption.StartGame) {
       width = 0;
@@ -142,6 +142,7 @@ class _PageContainerState extends State<PageContainer>
       duration: Duration(milliseconds: animationSpeed),
       width: width,
       height: height,
+      margin: const EdgeInsets.symmetric(horizontal: 0.0),
       decoration: BoxDecoration(
           color: widget.c, borderRadius: BorderRadius.all(Radius.circular(30))),
       child: Offstage(
@@ -155,7 +156,7 @@ class _PageContainerState extends State<PageContainer>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Container(
-                color: Colors.black.withOpacity(0.05),
+//                color: Colors.black.withOpacity(0.05),
                 child: widget.child,
               ),
               if (widget.pageNum != 1)

@@ -22,7 +22,7 @@ class _PageTwoState extends State<PageTwo> {
     GameState gameState = Provider.of<GameState>(context);
     double width = MediaQuery.of(context).size.width * kPageOpenWidthMultiplier;
     double height = (MediaQuery.of(context).size.height -
-        MediaQuery.of(context).padding.top) *
+            MediaQuery.of(context).padding.top) *
         kHeightMultiplier;
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -56,16 +56,17 @@ class _PageTwoState extends State<PageTwo> {
                 GestureDetector(
                   onTap: () async {
                     gameState.user = null;
-                    if (gameState.userName == '') return;
+                    if (gameState.userName == null || gameState.userName == '')
+                      return;
                     gameState.user =
-                    await Fire.instance.doesUserExist(gameState.userName);
+                        await Fire.instance.doesUserExist(gameState.userName);
                     setState(() {
                       if (gameState.curPageOption ==
                           PageOption.CreateUsername) {
                         if (gameState.user == null) {
                           // good
                           supportText =
-                          'Created new user ${gameState.userName}';
+                              'Created new user ${gameState.userName}';
                           gameState.user = User(name: gameState.userName);
                           Fire.instance.createUser(gameState.user);
                         } else {
@@ -76,7 +77,7 @@ class _PageTwoState extends State<PageTwo> {
                         if (gameState.user == null) {
                           // bad
                           supportText =
-                          'User ${gameState.userName} doesn\'t exist, please create account';
+                              'User ${gameState.userName} doesn\'t exist, please create account';
                         } else {
                           // good
                           supportText = 'Signing in ${gameState.userName}';
@@ -108,4 +109,3 @@ class _PageTwoState extends State<PageTwo> {
     );
   }
 }
-

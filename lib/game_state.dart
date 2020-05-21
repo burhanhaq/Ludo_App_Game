@@ -42,6 +42,7 @@ class GameState extends ChangeNotifier {
   }
 
   Slot getSlot(int id) {
+    if (id < 1 || id > 52) return null;
     return slotList[id - 1];
   }
 
@@ -157,7 +158,7 @@ class GameState extends ChangeNotifier {
     return pieceTurn[0];
   }
 
-  pieceTap(PlayerPiece pp) {
+  pieceTap(PlayerPiece pp) async {
     if (gameOver) return;
     print('Tapped Slot');
     if (pp == null) return;
@@ -171,7 +172,7 @@ class GameState extends ChangeNotifier {
         } else {
           movePiece(pp, movesList[selectedDiceIndex]);
         }
-        updateFireLocationList();
+        await updateFireLocationList();
       } else {
         print('No moves available. Tap Dice for moves');
       }
@@ -243,7 +244,7 @@ class GameState extends ChangeNotifier {
   void diceTap() {
     if (gameOver) return;
     PieceType turn = getTurn();
-    if (curPlayerPieceType != turn) return;
+//    if (curPlayerPieceType != turn) return;
     bool canThrow = canThrowDice();
     if (!canThrow) return;
     extraThrowToken = false;
@@ -294,6 +295,7 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
+  // todo this only works with 4 players
   setTurn(int turn) {
     switch (turn) {
       case 0:
@@ -423,7 +425,7 @@ class GameState extends ChangeNotifier {
   }
 
   // todo simplify this please
-  updateFireLocationList() {
+  updateFireLocationList() async {
     List<int> greenList = [];
     List<int> blueList = [];
     List<int> redList = [];
@@ -437,7 +439,7 @@ class GameState extends ChangeNotifier {
     String redStr = intListToString(redList);
     String yellowStr = intListToString(yellowList);
 
-    Fire.instance.gameCollection.document(gameID).updateData({
+    await Fire.instance.gameCollection.document(gameID).updateData({
       Fire.LOCATION_LIST: [greenStr, blueStr, redStr, yellowStr],
     });
   }
@@ -839,7 +841,7 @@ class GameState extends ChangeNotifier {
   }
 
 //  String _userName = 'u4';
-  String _userName;
+  String _userName = '';
 
   get userName => _userName;
 
@@ -848,7 +850,7 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  String _roomName;
+  String _roomName = '';
 
   get roomName => _roomName;
 

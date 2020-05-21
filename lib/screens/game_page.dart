@@ -44,7 +44,7 @@ class _GamePageState extends State<GamePage> {
     }
     diceMovesList = List.generate(
       gameState.movesList.length,
-          (index) => Stack(
+      (index) => Stack(
         alignment: Alignment.center,
         children: <Widget>[
           Icon(
@@ -89,7 +89,7 @@ class _GamePageState extends State<GamePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(
             rowLength,
-                (index) => Container(child: completedPiecesList[index].container),
+            (index) => Container(child: completedPiecesList[index].container),
           ),
         ),
       ],
@@ -113,12 +113,13 @@ class _GamePageState extends State<GamePage> {
     }
   }
 
-  // todo
-  // Add to each slot
-  // Only add which has changed
-  updateLocationList(GameState gameState, event) {
-    List<dynamic> locationList = event.data[Fire.LOCATION_LIST];
-    print(locationList);
+  // go to slot
+  // remove piece from slot
+  // if dead move to home
+  // else add piece to new slot
+  updateLocation(GameState gameState, event) async {
+    List<dynamic> locationList = await event.data[Fire.LOCATION_LIST];
+//    print(locationList);
     String greenStr = locationList[0];
     String blueStr = locationList[1];
     String redStr = locationList[2];
@@ -127,23 +128,66 @@ class _GamePageState extends State<GamePage> {
     List<int> blueList = GameState.stringToIntList(blueStr);
     List<int> redList = GameState.stringToIntList(redStr);
     List<int> yellowList = GameState.stringToIntList(yellowStr);
+    print(' green: $greenList');
+    print('  blue: $blueList');
+    print('   red: $redList');
+    print('yellow: $yellowList');
     for (int i = 0; i < kNumPlayerPieces; i++) {
       var curGreenPiece = gameState.getPlayerPieceList(PieceType.Green)[i];
       var curBluePiece = gameState.getPlayerPieceList(PieceType.Blue)[i];
       var curRedPiece = gameState.getPlayerPieceList(PieceType.Red)[i];
       var curYellowPiece = gameState.getPlayerPieceList(PieceType.Yellow)[i];
-
       if (curGreenPiece.location != greenList[i]) {
-
+        if (!curGreenPiece.isAtHome()) {
+          gameState
+              .getSlot(curGreenPiece.location)
+              .playerPieceList
+              .remove(curGreenPiece);
+        }
+        curGreenPiece.location = greenList[i];
+        gameState
+            .getSlot(curGreenPiece.location)
+            .playerPieceList
+            .add(curGreenPiece);
       }
       if (curBluePiece.location != blueList[i]) {
-
+        if (!curBluePiece.isAtHome()) {
+          gameState
+              .getSlot(curBluePiece.location)
+              .playerPieceList
+              .remove(curBluePiece);
+        }
+        curBluePiece.location = blueList[i];
+        gameState
+            .getSlot(curBluePiece.location)
+            .playerPieceList
+            .add(curBluePiece);
       }
       if (curRedPiece.location != redList[i]) {
-
+        if (!curRedPiece.isAtHome()) {
+          gameState
+              .getSlot(curRedPiece.location)
+              .playerPieceList
+              .remove(curRedPiece);
+        }
+        curRedPiece.location = redList[i];
+        gameState
+            .getSlot(curRedPiece.location)
+            .playerPieceList
+            .add(curRedPiece);
       }
       if (curYellowPiece.location != yellowList[i]) {
-
+        if (!curYellowPiece.isAtHome()) {
+          gameState
+              .getSlot(curYellowPiece.location)
+              .playerPieceList
+              .remove(curYellowPiece);
+        }
+        curYellowPiece.location = yellowList[i];
+        gameState
+            .getSlot(curYellowPiece.location)
+            .playerPieceList
+            .add(curYellowPiece);
       }
     }
   }
@@ -152,11 +196,11 @@ class _GamePageState extends State<GamePage> {
   Widget build(BuildContext context) {
     var gameState = Provider.of<GameState>(context);
 
-    Fire.instance.gameStream(gameState.gameID).listen((event) {
+    Fire.instance.gameStream(gameState.gameID).listen((event) async {
       if (event.exists) {
-        updateMovesList(gameState, event);
-        updateTurn(gameState, event);
-        updateLocationList(gameState, event);
+        await updateMovesList(gameState, event);
+        await updateTurn(gameState, event);
+        await updateLocation(gameState, event);
       }
     });
 

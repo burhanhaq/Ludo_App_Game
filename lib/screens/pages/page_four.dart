@@ -43,6 +43,7 @@ class _PageFourState extends State<PageFour> {
         Text(supportText, style: kPageContentStyle.copyWith(fontSize: 15)),
         GestureDetector(
           onTap: () async {
+            if (gameState.roomName == '') return;
             Future future = Fire.instance.doesRoomExist(gameState.roomName);
             setState(() {
               future.then((roomExists) async {
