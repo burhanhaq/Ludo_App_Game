@@ -97,29 +97,67 @@ class _GamePageState extends State<GamePage> {
     );
   }
 
+  updateMovesList(gameState, event) {
+    String movesString = event.data[Fire.MOVES_LIST];
+    List<int> movesList = GameState.stringToIntList(movesString);
+    if (!listEquals(gameState.movesList, movesList)) {
+      gameState.movesList = movesList;
+      print(movesList);
+    }
+  }
+
+  updateTurn(gameState, event) {
+    var fireTurn = event.data[Fire.TURN];
+    if (gameState.getTurn().index != fireTurn) {
+      gameState.setTurn(fireTurn);
+//          gameState.changeTurn(); // todo this might work
+    }
+  }
+
+  // todo
+  // Add to each slot
+  // Only add which has changed
+  updateLocationList(GameState gameState, event) {
+    List<dynamic> locationList = event.data[Fire.LOCATION_LIST];
+    print(locationList);
+    String greenStr = locationList[0];
+    String blueStr = locationList[1];
+    String redStr = locationList[2];
+    String yellowStr = locationList[3];
+    List<int> greenList = GameState.stringToIntList(greenStr);
+    List<int> blueList = GameState.stringToIntList(blueStr);
+    List<int> redList = GameState.stringToIntList(redStr);
+    List<int> yellowList = GameState.stringToIntList(yellowStr);
+    for (int i = 0; i < kNumPlayerPieces; i++) {
+      var curGreenPiece = gameState.getPlayerPieceList(PieceType.Green)[i];
+      var curBluePiece = gameState.getPlayerPieceList(PieceType.Blue)[i];
+      var curRedPiece = gameState.getPlayerPieceList(PieceType.Red)[i];
+      var curYellowPiece = gameState.getPlayerPieceList(PieceType.Yellow)[i];
+
+      if (curGreenPiece.location != greenList[i]) {
+
+      }
+      if (curBluePiece.location != blueList[i]) {
+
+      }
+      if (curRedPiece.location != redList[i]) {
+
+      }
+      if (curYellowPiece.location != yellowList[i]) {
+
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var gameState = Provider.of<GameState>(context);
 
     Fire.instance.gameStream(gameState.gameID).listen((event) {
       if (event.exists) {
-        String movesString = event.data[Fire.MOVES_LIST];
-        List<int> movesList = GameState.stringToIntList(movesString);
-        if (!listEquals(gameState.movesList, movesList)) {
-          gameState.movesList = movesList;
-          print(movesList);
-        }
-
-        var fireTurn = event.data[Fire.TURN];
-        if (gameState.getTurn().index != fireTurn) {
-          print('index  --  fireTurn');
-          print('   ${gameState.getTurn().index}   --   $fireTurn');
-          gameState.setTurn(fireTurn);
-//          gameState.changeTurn(); // todo this might work
-        } else {
-          print('==');
-          print('   ${gameState.getTurn().index}   --   $fireTurn');
-        }
+        updateMovesList(gameState, event);
+        updateTurn(gameState, event);
+        updateLocationList(gameState, event);
       }
     });
 

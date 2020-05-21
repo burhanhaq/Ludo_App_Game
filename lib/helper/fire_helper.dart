@@ -170,14 +170,14 @@ class Fire {
 //    return 1;
   }
 
-  updateFireState(
-      String gameID, String movesList, List locationList, PieceType turn) {
-    gameCollection.document(gameID).updateData({
-      MOVES_LIST: movesList,
-      LOCATION_LIST: locationList,
-      TURN: turn,
-    }).catchError((error) => null);
-  }
+//  updateFireState(
+//      String gameID, String movesList, List locationList, PieceType turn) {
+//    gameCollection.document(gameID).updateData({
+//      MOVES_LIST: movesList,
+//      LOCATION_LIST: locationList,
+//      TURN: turn,
+//    }).catchError((error) => null);
+//  }
 
   updateMovesList(String gameID, String movesList) {
     gameCollection.document(gameID).updateData({
@@ -205,10 +205,6 @@ class Fire {
     var roomID = kHash(roomname);
     return roomCollection.document(roomID).snapshots();
   }
-
-//  Stream<QuerySnapshot> get userQuery {
-//    return userCollection.snapshots();
-//  }
 
   Stream<DocumentSnapshot> gameStream(String gameID) {
     return gameCollection.document(gameID).snapshots();

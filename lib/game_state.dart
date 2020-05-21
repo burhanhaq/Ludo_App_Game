@@ -442,7 +442,9 @@ class GameState extends ChangeNotifier {
     });
   }
 
-  getFireLocationList() async {}
+  getFireLocationList() async {
+     // todo do I need this here
+  }
 
   int throwDice() {
     int num = math.Random().nextInt(kMaxDiceNum) + 1;
