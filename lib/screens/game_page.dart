@@ -117,9 +117,12 @@ class _GamePageState extends State<GamePage> {
   // remove piece from slot
   // if dead move to home
   // else add piece to new slot
+  List<dynamic> oldList = [];
   updateLocation(GameState gameState, event) async {
     List<dynamic> locationList = await event.data[Fire.LOCATION_LIST];
+
 //    print(locationList);
+//    gameState.changeLol();
     String greenStr = locationList[0];
     String blueStr = locationList[1];
     String redStr = locationList[2];

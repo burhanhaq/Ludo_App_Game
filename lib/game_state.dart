@@ -18,6 +18,14 @@ class GameState extends ChangeNotifier {
   int selectedDiceIndex = 0;
   int _lastMove = 1;
   bool gameOver = false;
+  bool _lol = false;
+
+  get lol => _lol;
+
+  changeLol() {
+    _lol = !lol;
+    notifyListeners();
+  }
 
   get movesList => _movesList;
 
@@ -790,10 +798,11 @@ class GameState extends ChangeNotifier {
 
   pageBack() {
     if (_curPage > 1) --_curPage;
+    print(_curPageOption);
     if (_curPageOption == PageOption.InsideRoom) {
       // remove user
       Fire.instance.removeUserFromRoom(
-          userName, roomName); // todo check make roomName='' ?
+          user.name, roomName); // todo check make roomName='' ?
     }
     notifyListeners();
   }
