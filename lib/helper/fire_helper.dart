@@ -22,6 +22,10 @@ class Fire {
   static const MOVES_LIST = 'movesList';
   static const LOCATION_LIST = 'locationList';
   static const TURN = 'turn';
+  static const P1_UPDATED = 'p1Updated';
+  static const P2_UPDATED = 'p2Updated';
+  static const P3_UPDATED = 'p3Updated';
+  static const P4_UPDATED = 'p4Updated';
 
   Fire._privateConstructor();
 
@@ -143,6 +147,7 @@ class Fire {
     var locationList = ['0,0,0,0', '0,0,0,0', '0,0,0,0', '0,0,0,0'];
     var turn = 0;
     var playerNames = [];
+    var defaultUpdatedValue = true;
     await Firestore.instance
         .collection(ROOMS_COLLECTION)
         .document(roomID)
@@ -153,12 +158,16 @@ class Fire {
     var gameID = DateTime.now().millisecondsSinceEpoch.toString();
     gameCollection.document(gameID).setData({
       GAME_ID: gameID,
+      ROOM_ID: roomID,
       MOVES_LIST: diceMovesList,
       LOCATION_LIST: locationList,
-      ROOM_ID: roomID,
       PLAYER_NAMES: playerNames,
       TURN: turn,
-    }).catchError((error) => null);
+      P1_UPDATED: defaultUpdatedValue,
+      P2_UPDATED: defaultUpdatedValue,
+      P3_UPDATED: defaultUpdatedValue,
+      P4_UPDATED: defaultUpdatedValue,
+    }).catchError((error) => print('Error creating Game'));
     _addGameIDToRoom(gameID, roomID);
     return gameID;
   }

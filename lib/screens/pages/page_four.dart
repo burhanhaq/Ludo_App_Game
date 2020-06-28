@@ -34,7 +34,7 @@ class _PageFourState extends State<PageFour> {
           padding: const EdgeInsets.symmetric(horizontal: 50.0),
           child: TextField(
             decoration: InputDecoration(hintText: 'Room Name'),
-            onChanged: (val) {
+            onSubmitted: (val) {
               gameState.roomName = val;
             },
             maxLength: 10,
@@ -164,26 +164,27 @@ class _PageFourState extends State<PageFour> {
 //        ),
       ],
     );
-    StreamSubscription roomSubscription;
     Stream<DocumentSnapshot> roomStream;
-    if (gameState.curPageOption != PageOption.CreateRoom) {
+    StreamSubscription roomSubscription;
+    if (gameState.curPage > 2) {
+      // past sign in/create account page
       roomStream = Fire.instance.roomStream(gameState.roomName);
       roomSubscription = roomStream.listen((DocumentSnapshot event) {
         if (event.exists) {
           List<dynamic> playerNameList = event.data[Fire.PLAYER_NAMES];
           var gameID = event.data[Fire.GAME_ID];
           if (gameID.toString().length > 0) {
-            if (gameState.gameID == null) {
+            if (gameState.gameID == null || gameState.gameID == '') {
               gameState.gameID = event.data[Fire.GAME_ID];
               gameState.pageForward(PageOption.StartGame);
               print('ID: >>> ${gameState.gameID}');
             }
           }
 
-          if (!listEquals(gameState.playerNameList, playerNameList)) {
-            gameState.playerNameList = playerNameList;
+          if (!listEquals(gameState.playerNamesList, playerNameList)) {
+            gameState.playerNamesList = playerNameList;
             var usernameIndex =
-                gameState.playerNameList.indexOf(gameState.user.name);
+                gameState.playerNamesList.indexOf(gameState.user.name);
             if (usernameIndex >= 0) {
               gameState.curPlayerPieceType =
                   gameState.initialPlayerPieceTypeFormation[usernameIndex];
@@ -202,7 +203,7 @@ class _PageFourState extends State<PageFour> {
               String roomName = gameState.roomName;
 
               List<Widget> columnList = List.generate(
-                gameState.playerNameList.length,
+                gameState.playerNamesList.length,
                 (index) => Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
@@ -219,7 +220,7 @@ class _PageFourState extends State<PageFour> {
                     ),
                     SizedBox(width: 15),
                     Text(
-                      gameState.playerNameList[index],
+                      gameState.playerNamesList[index],
                       style: kPageFourStyle,
                     ),
                   ],
@@ -249,10 +250,10 @@ class _PageFourState extends State<PageFour> {
         SizedBox(height: 40),
         GestureDetector(
           onTap: () async {
-            roomSubscription.cancel();
             gameState.gameID =
                 await Fire.instance.createGame(gameState.roomName);
             gameState.pageForward(PageOption.StartGame);
+//            roomSubscription.cancel();
           },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,

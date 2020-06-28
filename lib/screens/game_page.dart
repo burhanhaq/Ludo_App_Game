@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:async';
 
 import '../widgets/column_area.dart';
 import '../constants.dart';
@@ -105,7 +107,7 @@ class _GamePageState extends State<GamePage> {
     }
   }
 
-  updateTurn(gameState, event) {
+  updateTurn(GameState gameState, DocumentSnapshot event) {
     var fireTurn = event.data[Fire.TURN];
     if (gameState.getTurn().index != fireTurn) {
       gameState.setTurn(fireTurn);
@@ -113,14 +115,14 @@ class _GamePageState extends State<GamePage> {
     }
   }
 
-  // go to slot
-  // remove piece from slot
-  // if dead move to home
-  // else add piece to new slot
-  List<dynamic> oldList = [];
-  updateLocation(GameState gameState, event) async {
+  updateLocation(GameState gameState, DocumentSnapshot event) async {
     List<dynamic> locationList = await event.data[Fire.LOCATION_LIST];
-
+    List<dynamic> playerUpdatedList = [
+      await event.data[Fire.P1_UPDATED],
+      await event.data[Fire.P2_UPDATED],
+      await event.data[Fire.P3_UPDATED],
+      await event.data[Fire.P4_UPDATED],
+    ];
 //    print(locationList);
 //    gameState.changeLol();
     String greenStr = locationList[0];
@@ -131,81 +133,103 @@ class _GamePageState extends State<GamePage> {
     List<int> blueList = GameState.stringToIntList(blueStr);
     List<int> redList = GameState.stringToIntList(redStr);
     List<int> yellowList = GameState.stringToIntList(yellowStr);
-    print(' green: $greenList');
-    print('  blue: $blueList');
-    print('   red: $redList');
-    print('yellow: $yellowList');
+    print(' $greenList');
+    print(' $blueList');
+    print(' $redList');
+    print(' $yellowList');
+    print('-');
     for (int i = 0; i < kNumPlayerPieces; i++) {
       var curGreenPiece = gameState.getPlayerPieceList(PieceType.Green)[i];
       var curBluePiece = gameState.getPlayerPieceList(PieceType.Blue)[i];
       var curRedPiece = gameState.getPlayerPieceList(PieceType.Red)[i];
       var curYellowPiece = gameState.getPlayerPieceList(PieceType.Yellow)[i];
-      if (curGreenPiece.location != greenList[i]) {
-        if (!curGreenPiece.isAtHome()) {
-          gameState
-              .getSlot(curGreenPiece.location)
-              .playerPieceList
-              .remove(curGreenPiece);
+      // todo need to implement delete
+      if (gameState.curPlayerPieceType != PieceType.Green) {
+        if (!playerUpdatedList[gameState.curPlayerPieceType.index]) {
+          if (curGreenPiece.location != greenList[i]) {
+            if (curGreenPiece.isAtHome()) {
+              gameState.addPiece(curGreenPiece);
+            } else {
+              gameState.movePiece(curGreenPiece, greenList[i],
+                  fireUpdate: true);
+            }
+          }
         }
-        curGreenPiece.location = greenList[i];
-        gameState
-            .getSlot(curGreenPiece.location)
-            .playerPieceList
-            .add(curGreenPiece);
       }
-      if (curBluePiece.location != blueList[i]) {
-        if (!curBluePiece.isAtHome()) {
-          gameState
-              .getSlot(curBluePiece.location)
-              .playerPieceList
-              .remove(curBluePiece);
+      if (gameState.curPlayerPieceType != PieceType.Blue) {
+        if (!playerUpdatedList[gameState.curPlayerPieceType.index]) {
+          if (curBluePiece.location != blueList[i]) {
+            if (curBluePiece.isAtHome()) {
+              gameState.addPiece(curBluePiece);
+            } else {
+              gameState.movePiece(curBluePiece, blueList[i], fireUpdate: true);
+            }
+          }
         }
-        curBluePiece.location = blueList[i];
-        gameState
-            .getSlot(curBluePiece.location)
-            .playerPieceList
-            .add(curBluePiece);
       }
-      if (curRedPiece.location != redList[i]) {
-        if (!curRedPiece.isAtHome()) {
-          gameState
-              .getSlot(curRedPiece.location)
-              .playerPieceList
-              .remove(curRedPiece);
+      if (gameState.curPlayerPieceType != PieceType.Red) {
+        if (!playerUpdatedList[gameState.curPlayerPieceType.index]) {
+          if (curRedPiece.location != redList[i]) {
+            if (curRedPiece.isAtHome()) {
+              gameState.addPiece(curRedPiece);
+            } else {
+              gameState.movePiece(curRedPiece, redList[i], fireUpdate: true);
+            }
+          }
         }
-        curRedPiece.location = redList[i];
-        gameState
-            .getSlot(curRedPiece.location)
-            .playerPieceList
-            .add(curRedPiece);
       }
-      if (curYellowPiece.location != yellowList[i]) {
-        if (!curYellowPiece.isAtHome()) {
-          gameState
-              .getSlot(curYellowPiece.location)
-              .playerPieceList
-              .remove(curYellowPiece);
+      if (gameState.curPlayerPieceType != PieceType.Yellow) {
+        if (!playerUpdatedList[gameState.curPlayerPieceType.index]) {
+          if (curYellowPiece.location != yellowList[i]) {
+            if (curYellowPiece.isAtHome()) {
+              gameState.addPiece(curYellowPiece);
+            } else {
+              gameState.movePiece(curYellowPiece, yellowList[i],
+                  fireUpdate: true);
+            }
+          }
         }
-        curYellowPiece.location = yellowList[i];
-        gameState
-            .getSlot(curYellowPiece.location)
-            .playerPieceList
-            .add(curYellowPiece);
       }
     }
+
+    await Fire.instance.gameCollection
+        .document(gameState.gameID)
+        .updateData({
+      Fire.P1_UPDATED: false,
+      Fire.P2_UPDATED: false,
+      Fire.P3_UPDATED: false,
+      Fire.P4_UPDATED: false,
+    });
   }
+
+  Stream<DocumentSnapshot> roomStream;
+  StreamSubscription roomSubscription;
 
   @override
   Widget build(BuildContext context) {
     var gameState = Provider.of<GameState>(context);
 
-    Fire.instance.gameStream(gameState.gameID).listen((event) async {
-      if (event.exists) {
-        await updateMovesList(gameState, event);
-        await updateTurn(gameState, event);
-        await updateLocation(gameState, event);
-      }
-    });
+    // todo check if this works
+    if (gameState.gameID != null &&
+        gameState.gameID != '' &&
+        gameState.curPageOption == PageOption.StartGame) {
+      roomStream = Fire.instance.gameStream(gameState.gameID);
+      roomSubscription = roomStream.listen((event) async {
+        if (event.exists) {
+          await updateMovesList(gameState, event);
+          await updateTurn(gameState, event);
+          await updateLocation(gameState, event);
+        }
+      });
+    }
+
+//    Fire.instance.gameStream(gameState.gameID).listen((event) async {
+//      if (event.exists) {
+//        await updateMovesList(gameState, event);
+//        await updateTurn(gameState, event);
+//        await updateLocation(gameState, event);
+//      }
+//    });
 
     Color stateColor = PlayerPiece.getColor(gameState.getTurn());
     generateSelectedDiceList(gameState);
@@ -369,5 +393,11 @@ class _GamePageState extends State<GamePage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    roomSubscription.cancel();
+    super.dispose();
   }
 }

@@ -398,13 +398,11 @@ class GameState extends ChangeNotifier {
       pp.location = homePosition;
       getSlot(homePosition).playerPieceList.add(pp);
       removeNumFromMovesList(6);
-    } else {
-      print('AddPiece() No available pieces found');
     }
     notifyListeners();
   }
 
-  movePiece(PlayerPiece pp, int moveDistance) {
+  movePiece(PlayerPiece pp, int moveDistance, {bool fireUpdate = false}) {
     if (pp.location > 100) {
       movePieceInEndCol(pp, moveDistance);
     } else if (checkAddToEndCol(pp, moveDistance)) {
@@ -418,6 +416,8 @@ class GameState extends ChangeNotifier {
       pp.location = newLocation;
       getSlot(curLocation).playerPieceList.remove(pp);
       getSlot(newLocation).playerPieceList.add(pp);
+      if (fireUpdate)
+        return; // todo this wont work for when moving piece to/in end col because of removeNumFromMovesList()
       removeNumFromMovesList(moveDistance);
       selectedDiceIndex = 0;
       if (canDelete(pp.location)) {
@@ -430,53 +430,6 @@ class GameState extends ChangeNotifier {
     }
 
     notifyListeners();
-  }
-
-  // todo simplify this please
-  updateFireLocationList() async {
-    List<int> greenList = [];
-    List<int> blueList = [];
-    List<int> redList = [];
-    List<int> yellowList = [];
-    greenPlayerPieces.forEach((element) => greenList.add(element.location));
-    bluePlayerPieces.forEach((element) => blueList.add(element.location));
-    redPlayerPieces.forEach((element) => redList.add(element.location));
-    yellowPlayerPieces.forEach((element) => yellowList.add(element.location));
-    String greenStr = intListToString(greenList);
-    String blueStr = intListToString(blueList);
-    String redStr = intListToString(redList);
-    String yellowStr = intListToString(yellowList);
-
-    await Fire.instance.gameCollection.document(gameID).updateData({
-      Fire.LOCATION_LIST: [greenStr, blueStr, redStr, yellowStr],
-    });
-  }
-
-  getFireLocationList() async {}
-
-  int throwDice() {
-    int num = math.Random().nextInt(kMaxDiceNum) + 1;
-    lastMoveOnDice = num;
-    print('threw $num');
-    return num;
-  }
-
-  didPlayerWin(PieceType pt) {
-    return getPlayerPieceList(pt).every((element) => element.isRunComplete());
-  }
-
-  playerFinishedRun() {
-    winnerList.add(getTurn());
-    pieceTurn.remove(getTurn());
-    if (pieceTurn.length == 1) {
-      gameOver = true;
-    }
-  }
-
-  pieceFinishedRun(PlayerPiece pp) {
-    extraThrowToken = true;
-    clearMovesList();
-//    pp.isAtEndColumn = true;
   }
 
   movePieceInEndCol(PlayerPiece pp, int moveDistance) {
@@ -545,6 +498,55 @@ class GameState extends ChangeNotifier {
         break;
     }
     return false;
+  }
+
+  // todo simplify this please
+  updateFireLocationList() async {
+    List<int> greenList = [];
+    List<int> blueList = [];
+    List<int> redList = [];
+    List<int> yellowList = [];
+    greenPlayerPieces.forEach((element) => greenList.add(element.location));
+    bluePlayerPieces.forEach((element) => blueList.add(element.location));
+    redPlayerPieces.forEach((element) => redList.add(element.location));
+    yellowPlayerPieces.forEach((element) => yellowList.add(element.location));
+    String greenStr = intListToString(greenList);
+    String blueStr = intListToString(blueList);
+    String redStr = intListToString(redList);
+    String yellowStr = intListToString(yellowList);
+
+    await Fire.instance.gameCollection.document(gameID).updateData({
+      Fire.LOCATION_LIST: [greenStr, blueStr, redStr, yellowStr],
+      Fire.P1_UPDATED: true,
+      Fire.P2_UPDATED: true,
+      Fire.P3_UPDATED: true,
+      Fire.P4_UPDATED: true,
+    });
+  }
+
+  int throwDice() {
+    int num = math.Random().nextInt(kMaxDiceNum) + 1;
+    lastMoveOnDice = num;
+    print('threw $num');
+    return num;
+  }
+
+  didPlayerWin(PieceType pt) {
+    return getPlayerPieceList(pt).every((element) => element.isRunComplete());
+  }
+
+  playerFinishedRun() {
+    winnerList.add(getTurn());
+    pieceTurn.remove(getTurn());
+    if (pieceTurn.length == 1) {
+      gameOver = true;
+    }
+  }
+
+  pieceFinishedRun(PlayerPiece pp) {
+    extraThrowToken = true;
+    clearMovesList();
+//    pp.isAtEndColumn = true;
   }
 
   List<PlayerPiece> getPlayerPieceList(PieceType pt) {
@@ -868,7 +870,7 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  String _gameID;
+  String _gameID = '';
 
   get gameID => _gameID;
 
@@ -877,12 +879,12 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<dynamic> _playerNameList = [];
+  List<dynamic> _playerNamesList = [];
 
-  get playerNameList => _playerNameList;
+  get playerNamesList => _playerNamesList;
 
-  set playerNameList(List val) {
-    _playerNameList = val;
+  set playerNamesList(List val) {
+    _playerNamesList = val;
     notifyListeners();
   }
 

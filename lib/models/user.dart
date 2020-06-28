@@ -7,12 +7,17 @@ class User {
   String name;
   int wins;
   int games;
+  PieceType pieceType;
 
   User({
     @required this.name,
     this.wins = 0,
     this.games = 0,
   });
+
+  int playerNum() {
+    return this.pieceType.index;
+  }
 
   Map<String, dynamic> toJson() => {
         Fire.NAME: name,

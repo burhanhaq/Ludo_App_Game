@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
 const double kEndSpacing = 30.0;
 const Color grey = Color(0xff343437);
@@ -69,17 +70,23 @@ enum PageOption {
 const kPageOpenWidthMultiplier = 0.85;
 const kPageClosedWidthMultiplier = 0.05;
 
-kHash(element) {
+String kHash(element) {
   element = element.toString().toLowerCase();
-  int hash = 31 * 17;
-  for (int i = 0; i < element.length - 1; i++) {
-    if (i % 2 == 0) {
-      hash += element.codeUnitAt(i);
-    } else if (i % 1 == 0) {
-      hash *= element.codeUnitAt(i);
+  if (element.length < 1) return '-1';
+  int multiplier = 31;
+  int hash = 0;
+  for (int i = 0; i < element.length; i++) {
+    hash += math.pow(element.codeUnitAt(i), (element.length - i));
+    print('$hash >');
+    if (hash.abs() > math.pow(10, 10)) {
+      if (hash < 0) hash *= -1;
+      hash ~/= (math.pow(10, 5));
     }
+    print('$hash <');
   }
+  hash *= multiplier;
+  print('$hash <<<<');
   String str = hash.toString();
-
-  return str.length > 10 ? str.substring(str.length - 10) : str;
+return str;
+//  return str.length > 10 ? str.substring(str.length - 10) : str;
 }
