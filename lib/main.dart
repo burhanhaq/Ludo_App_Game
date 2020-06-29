@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'DisIsLudo',
       home: ChangeNotifierProvider(
-        create: (context) => GameState()..initialize(),
+        create: (context) => GameState(),
         child: Home(),
       ),
     );

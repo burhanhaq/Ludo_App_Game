@@ -23,7 +23,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
-    GameState gameState = Provider.of<GameState>(context);
+    GameState gameState = Provider.of<GameState>(context)
+      ..initialize(MediaQuery.of(context).size.width);
     Color backColor = grey;
     switch (gameState.curPage) {
       case 1:

@@ -19,7 +19,6 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> {
-  final middleAreaSize = (kBoxWidth + kBoxBorderWidth * 2) * 3;
 
   void listenToList() {
 //    Fire.instance.listenForNewEverything().listen((data) {
@@ -144,62 +143,15 @@ class _GamePageState extends State<GamePage> {
       var curRedPiece = gameState.getPlayerPieceList(PieceType.Red)[i];
       var curYellowPiece = gameState.getPlayerPieceList(PieceType.Yellow)[i];
       // todo need to implement delete
-      if (gameState.curPlayerPieceType != PieceType.Green) {
-        if (!playerUpdatedList[gameState.curPlayerPieceType.index]) {
-          if (curGreenPiece.location != greenList[i]) {
-            if (curGreenPiece.isAtHome()) {
-              gameState.addPiece(curGreenPiece);
-            } else {
-              gameState.movePiece(curGreenPiece, greenList[i],
-                  fireUpdate: true);
-            }
-          }
-        }
-      }
-      if (gameState.curPlayerPieceType != PieceType.Blue) {
-        if (!playerUpdatedList[gameState.curPlayerPieceType.index]) {
-          if (curBluePiece.location != blueList[i]) {
-            if (curBluePiece.isAtHome()) {
-              gameState.addPiece(curBluePiece);
-            } else {
-              gameState.movePiece(curBluePiece, blueList[i], fireUpdate: true);
-            }
-          }
-        }
-      }
-      if (gameState.curPlayerPieceType != PieceType.Red) {
-        if (!playerUpdatedList[gameState.curPlayerPieceType.index]) {
-          if (curRedPiece.location != redList[i]) {
-            if (curRedPiece.isAtHome()) {
-              gameState.addPiece(curRedPiece);
-            } else {
-              gameState.movePiece(curRedPiece, redList[i], fireUpdate: true);
-            }
-          }
-        }
-      }
-      if (gameState.curPlayerPieceType != PieceType.Yellow) {
-        if (!playerUpdatedList[gameState.curPlayerPieceType.index]) {
-          if (curYellowPiece.location != yellowList[i]) {
-            if (curYellowPiece.isAtHome()) {
-              gameState.addPiece(curYellowPiece);
-            } else {
-              gameState.movePiece(curYellowPiece, yellowList[i],
-                  fireUpdate: true);
-            }
-          }
-        }
-      }
-    }
 
-    await Fire.instance.gameCollection
-        .document(gameState.gameID)
-        .updateData({
-      Fire.P1_UPDATED: false,
-      Fire.P2_UPDATED: false,
-      Fire.P3_UPDATED: false,
-      Fire.P4_UPDATED: false,
-    });
+
+    }
+//    await Fire.instance.gameCollection.document(gameState.gameID).updateData({
+//      Fire.P1_UPDATED: false,
+//      Fire.P2_UPDATED: false,
+//      Fire.P3_UPDATED: false,
+//      Fire.P4_UPDATED: false,
+//    });
   }
 
   Stream<DocumentSnapshot> roomStream;
@@ -231,6 +183,8 @@ class _GamePageState extends State<GamePage> {
 //      }
 //    });
 
+    final middleAreaSize = (gameState.boxWidth + gameState.boxBorderWidth * 2) * 3;
+
     Color stateColor = PlayerPiece.getColor(gameState.getTurn());
     generateSelectedDiceList(gameState);
     generateDiceMovesList(gameState, stateColor);
@@ -239,15 +193,15 @@ class _GamePageState extends State<GamePage> {
         color: grey,
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            maxHeight: (kBoxWidth) * 15,
-            maxWidth: (kBoxWidth) * 15,
+            maxHeight: (gameState.boxWidth) * 15,
+            maxWidth: (gameState.boxWidth) * 15,
           ),
           child: Column(
             children: <Widget>[
               SizedBox(height: MediaQuery.of(context).size.height * 0.04),
               SizedBox(
-                height: (kBoxWidth + kBoxBorderWidth * 2) * 15,
-                width: (kBoxWidth + kBoxBorderWidth * 2) * 15,
+                height: (gameState.boxWidth + gameState.boxBorderWidth * 2) * 15,
+                width: (gameState.boxWidth + gameState.boxBorderWidth * 2) * 15,
                 child: Stack(
                   alignment: Alignment.center,
                   children: <Widget>[

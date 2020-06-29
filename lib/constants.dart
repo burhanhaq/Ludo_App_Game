@@ -17,11 +17,11 @@ const Color trans = Colors.transparent;
 const Color pink = Color(0xff85203b);
 const Color orange = Color(0xffff9f68);
 
-const kBoxWidth = 25.0;
-const kBoxBorderWidth = 1.0;
-const kHomeWidth = 160.0;
-const kPieceSize = 20.0;
-const kHomePieceOffset = 25.0;
+//const kBoxWidth = 25.0;
+//const kBoxBorderWidth = 1.0;
+//const kHomeWidth = 160.0;
+//const kPieceSize = 20.0;
+//const kHomePieceOffset = 25.0;
 
 enum PieceType { Green, Blue, Red, Yellow }
 
@@ -87,6 +87,6 @@ String kHash(element) {
   hash *= multiplier;
   print('$hash <<<<');
   String str = hash.toString();
-return str;
+  return str;
 //  return str.length > 10 ? str.substring(str.length - 10) : str;
 }

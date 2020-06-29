@@ -22,6 +22,7 @@ class _PieceHomeState extends State<PieceHome> {
 
   @override
   Widget build(BuildContext context) {
+
     var gameState = Provider.of<GameState>(context);
     List<PlayerPiece> piecesList = gameState.getPlayerPieceList(widget.pt);
     List<Widget> widgetPieceList = List.generate(
@@ -33,8 +34,8 @@ class _PieceHomeState extends State<PieceHome> {
           }
         },
         child: Container(
-          height: kPieceSize - 5,
-          width: kPieceSize - 5,
+          height: gameState.pieceWidth - 5,
+          width: gameState.pieceWidth - 5,
           decoration: BoxDecoration(
             color: Colors.black12,
             shape: BoxShape.circle,
@@ -50,10 +51,10 @@ class _PieceHomeState extends State<PieceHome> {
     );
     Icon iconWidget = Icon(Icons.signal_cellular_off,
         color: gameState.getTurn() == widget.pt ? Colors.black54 : trans,
-        size: kHomeWidth / 5);
+        size: gameState.homeWidth / 5);
     return Container(
-      height: kHomeWidth,
-      width: kHomeWidth,
+      height: gameState.homeWidth,
+      width: gameState.homeWidth,
       decoration: BoxDecoration(
         color: widget.c,
         borderRadius: BorderRadius.all(Radius.circular(5.0)),

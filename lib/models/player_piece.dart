@@ -7,17 +7,22 @@ class PlayerPiece {
   int pieceId;
   Widget container;
   int location;
+  double pieceWidth;
 
 //  PieceType pieceTurn;
 //  bool isAtEndColumn;
 
-  PlayerPiece({this.pieceId, this.pieceType}) {
+  PlayerPiece({
+    @required this.pieceId,
+    @required this.pieceType,
+    @required this.pieceWidth,
+  }) {
     location = 0;
 //    isAtEndColumn = false;
     Color c = getColor(this.pieceType);
     container = Container(
-      height: kPieceSize,
-      width: kPieceSize,
+      height: pieceWidth,
+      width: pieceWidth,
       decoration: BoxDecoration(
         color: c,
         shape: BoxShape.circle,

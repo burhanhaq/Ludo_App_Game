@@ -20,6 +20,7 @@ class CustomBox extends StatefulWidget {
 class _CustomBoxState extends State<CustomBox> {
   @override
   Widget build(BuildContext context) {
+
     GameState gameState = Provider.of<GameState>(context);
     List<PlayerPiece> piecesList = widget.slot.playerPieceList;
     var text = widget.slot.id.toString();
@@ -30,7 +31,7 @@ class _CustomBoxState extends State<CustomBox> {
       text,
       style: TextStyle(
         color: Colors.brown,
-        fontSize: 17,
+        fontSize: 10,
         decoration: TextDecoration.none,
       ),
     );
@@ -57,7 +58,7 @@ class _CustomBoxState extends State<CustomBox> {
           Icon(
             Icons.merge_type,
             color: Colors.black45,
-            size: kBoxWidth,
+            size: gameState.boxWidth,
           ));
     } else if (widget.slot.isOtherStop) {
       stackList.insert(
@@ -67,7 +68,7 @@ class _CustomBoxState extends State<CustomBox> {
             child: Icon(
               Icons.call_split,
               color: Colors.black45,
-              size: kBoxWidth,
+              size: gameState.boxWidth,
             ),
           ));
     }
@@ -82,11 +83,11 @@ class _CustomBoxState extends State<CustomBox> {
       child: Container(
         decoration: BoxDecoration(
           color: widget.c,
-          border: Border.all(color: Colors.black, width: kBoxBorderWidth),
+          border: Border.all(color: Colors.black, width: gameState.boxBorderWidth),
         ),
         child: SizedBox(
-          height: kBoxWidth,
-          width: kBoxWidth,
+          height: gameState.boxWidth,
+          width: gameState.boxWidth,
           child: Stack(
             alignment: Alignment.center,
             children: stackList,

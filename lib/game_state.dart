@@ -18,14 +18,19 @@ class GameState extends ChangeNotifier {
   int selectedDiceIndex = 0;
   int _lastMove = 1;
   bool gameOver = false;
-  bool _lol = false;
 
-  get lol => _lol;
+  double _boxBorderWidth;
+  double _boxWidth;
+  double _homeWidth;
+  double _pieceWidth;
 
-  changeLol() {
-    _lol = !lol;
-    notifyListeners();
-  }
+  get boxBorderWidth => _boxBorderWidth;
+
+  get boxWidth => _boxWidth;
+
+  get homeWidth => _homeWidth;
+
+  get pieceWidth => _pieceWidth;
 
   get movesList => _movesList;
 
@@ -105,14 +110,21 @@ class GameState extends ChangeNotifier {
 //    pp.isAtEndColumn = true;
   }
 
-  initialize() {
+  initialize(double width) {
     if (kReleaseMode) {
       _curPage = 1;
       _curPageOption = PageOption.None;
     }
+
+    // set width ratio
+    _boxBorderWidth = 1.0;
+    _boxWidth = (width) / 15 - _boxBorderWidth * 3;
+    _homeWidth = (width) / 15 * 6- _boxBorderWidth * 6;
+    _pieceWidth = width / 16;
+
     setTurnsForPlayers(4);
 
-    generatePlayerPieces();
+    generatePlayerPieces(pieceWidth);
     initColumn();
     // 1 - 13 green
     _setOtherStop(4);
@@ -160,6 +172,8 @@ class GameState extends ChangeNotifier {
 //    setPieceWon(yellowPlayerPieces[1]);
 //    setPieceWon(yellowPlayerPieces[2]);
 //    setPieceWon(yellowPlayerPieces[3]);
+
+//    notifyListeners();
   }
 
   PieceType getTurn() {
@@ -563,13 +577,14 @@ class GameState extends ChangeNotifier {
     return null;
   }
 
-  generatePlayerPieces() {
+  generatePlayerPieces(double pieceWidth) {
     // todo generate only for current number of players
     greenPlayerPieces = List.generate(
       kNumPlayerPieces,
       (index) => PlayerPiece(
         pieceId: index,
         pieceType: PieceType.Green,
+        pieceWidth: pieceWidth,
 //        pieceTurn: getTurn(),
       ),
     );
@@ -578,6 +593,7 @@ class GameState extends ChangeNotifier {
       (index) => PlayerPiece(
         pieceId: index,
         pieceType: PieceType.Blue,
+        pieceWidth: pieceWidth,
 //        pieceTurn: getTurn(),
       ),
     );
@@ -586,6 +602,7 @@ class GameState extends ChangeNotifier {
       (index) => PlayerPiece(
         pieceId: index,
         pieceType: PieceType.Red,
+        pieceWidth: pieceWidth,
 //        pieceTurn: getTurn(),
       ),
     );
@@ -594,6 +611,7 @@ class GameState extends ChangeNotifier {
       (index) => PlayerPiece(
         pieceId: index,
         pieceType: PieceType.Yellow,
+        pieceWidth: pieceWidth,
 //        pieceTurn: getTurn(),
       ),
     );
@@ -789,12 +807,13 @@ class GameState extends ChangeNotifier {
   }
 
 // ------------------------------------------------------------------------------------------- HOME PAGE
-  int _curPage = 1;
+  int _curPage = 3;
 
   get curPage => _curPage;
 
-//  PageOption _curPageOption = PageOption.JoinRoom;
-  PageOption _curPageOption;
+  PageOption _curPageOption = PageOption.JoinRoom;
+
+//  PageOption _curPageOption;
 
   get curPageOption => _curPageOption;
 
@@ -841,8 +860,9 @@ class GameState extends ChangeNotifier {
   }
 
 // ------------------------------------------------------------------------------------ ONLINE STUFF
-//  User _user = User(name: 'u4');
-  User _user;
+  User _user = User(name: 'a');
+
+//  User _user;
 
   get user => _user;
 
@@ -851,8 +871,9 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-//  String _userName = 'u4';
-  String _userName = '';
+  String _userName = 'a';
+
+//  String _userName = '';
 
   get userName => _userName;
 
