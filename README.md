@@ -27,7 +27,7 @@ Soon
 ## Setup
 * Download [Flutter SDK](https://flutter.dev/docs/get-started/install) and set the Path variables appropriately
 * (Optional) Download a convenient IDE: [Visual Studio Code](https://code.visualstudio.com/Download) or [Android Studio](https://developer.android.com/studio/install)
-* [Fork](https://github.com/burhanhaq/Lud_App_Game/fork) or download this project
+* [Fork](https://github.com/burhanhaq/Ludo_App_Game/fork) or download this project
 * Open your virtual device OR connect your phone to your computer and allow installation of unknown apps
 * Open in your IDE of choice and press 'Run'
 * OR open a command window in the project's home directory and type
