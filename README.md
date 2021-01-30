@@ -48,7 +48,7 @@ Further work on this app is being done in Unity [here](<https://github.com/burha
 My main motivation for making another Ludo game was to actually implement a die that didn't have rigged values. Other Ludo games would not make use of a pure random die and so would output absurb possibilities of numbers. I set out to stop that once and for all!
 
 ## Contributing
-1. Fork it (<https://github.com/burhanhaq/ProductivePomo/fork>)
+1. Fork it (<https://github.com/burhanhaq/Ludo_App_Game/fork>)
 2. Create your feature branch (`git checkout -b feature/fooBar`)
 3. Commit your changes (`git commit -am 'Add some fooBar'`)
 4. Push to the branch (`git push origin feature/fooBar`)
